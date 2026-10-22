@@ -220,6 +220,21 @@ def compare_policies(
                 "ci_high": d.high,
                 "significant": d.excludes_zero(),
             }
+    # Episode-level samples so the UI can show distributions, not just means. For PPO the
+    # episodes of all seeds are pooled (n_episodes x n_seeds samples).
+    results["distributions"] = {
+        name: {
+            "duration": [round(r.elapsed, 1) for r in ev.records],
+            "tests": [r.n_tests for r in ev.records],
+        }
+        for name, ev in evals.items()
+    }
+    if rl_records:
+        pooled = [r for recs in rl_records.values() for r in recs]
+        results["distributions"]["ppo"] = {
+            "duration": [round(r.elapsed, 1) for r in pooled],
+            "tests": [r.n_tests for r in pooled],
+        }
     results["_raw"] = {"baseline_evals": evals, "rl_records": rl_records}
     return results
 

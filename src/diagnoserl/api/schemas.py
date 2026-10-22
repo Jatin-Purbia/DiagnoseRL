@@ -37,6 +37,7 @@ class ExecutedTestOut(BaseModel):
     posterior_after: list[float]
     recommendation: dict[str, Any] | None
     followed_recommendation: bool | None
+    executed_at: datetime | None = None
 
 
 class SessionOut(BaseModel):

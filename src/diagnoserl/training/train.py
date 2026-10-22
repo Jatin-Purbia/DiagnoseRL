@@ -14,7 +14,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, SupportsFloat
+from typing import Any, ClassVar, SupportsFloat
 
 import gymnasium as gym
 from sb3_contrib import MaskablePPO
@@ -28,7 +28,7 @@ from diagnoserl.config import DiagnosticModel
 from diagnoserl.env import DiagnoseRLEnv
 from diagnoserl.evaluation import evaluate_policy, summarize
 from diagnoserl.incident import generate_incidents
-from diagnoserl.logging_config import configure_logging
+from diagnoserl.logging_config import JsonFormatter, configure_logging
 from diagnoserl.training.config import TrainConfig, load_train_config
 
 log = logging.getLogger(__name__)
@@ -55,6 +55,53 @@ def make_env(model: DiagnosticModel, cfg: TrainConfig) -> Any:
         model, cfg.reward.to_reward_config(), include_posterior=cfg.include_posterior
     )
     return ActionMasker(RewardScale(Monitor(env), cfg.reward_scale), _action_masks)
+
+
+class TrainingMetricsCallback(BaseCallback):
+    """Append PPO's own training diagnostics to ``train_metrics.jsonl``.
+
+    Only values the algorithm actually emitted are recorded: the mean raw episode reward / length
+    from the Monitor buffer and, once an update has happened, the losses and entropy from SB3's
+    logger. Losses are absent for the first rollout and are omitted rather than invented.
+    """
+
+    KEYS: ClassVar[dict[str, str]] = {
+        "train/policy_gradient_loss": "policy_loss",
+        "train/value_loss": "value_loss",
+        "train/entropy_loss": "entropy_loss",
+        "train/approx_kl": "approx_kl",
+        "train/explained_variance": "explained_variance",
+    }
+
+    def __init__(self, run_dir: Path, every: int = 5) -> None:
+        super().__init__()
+        self.path = run_dir / "train_metrics.jsonl"
+        self.every = every
+        self._rollouts = 0
+        self._started = time.time()
+        self.path.write_text("", encoding="utf-8")
+
+    def _on_step(self) -> bool:
+        return True
+
+    def _on_rollout_end(self) -> None:
+        self._rollouts += 1
+        if self._rollouts % self.every != 0:
+            return
+        row: dict[str, Any] = {
+            "timesteps": int(self.num_timesteps),
+            "wall_seconds": round(time.time() - self._started, 1),
+        }
+        buffer = self.model.ep_info_buffer
+        if buffer:
+            row["ep_rew_mean"] = float(sum(e["r"] for e in buffer) / len(buffer))
+            row["ep_len_mean"] = float(sum(e["l"] for e in buffer) / len(buffer))
+        logged = self.model.logger.name_to_value
+        for src, dst in self.KEYS.items():
+            if src in logged:
+                row[dst] = float(logged[src])
+        with self.path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row) + "\n")
 
 
 class ValidationCallback(BaseCallback):
@@ -153,6 +200,11 @@ def train(cfg: TrainConfig) -> TrainResult:
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "metrics.jsonl").write_text("", encoding="utf-8")
     (run_dir / "config.json").write_text(cfg.model_dump_json(indent=2), encoding="utf-8")
+    file_handler = logging.FileHandler(run_dir / "train.log", mode="w", encoding="utf-8")
+    file_handler.setFormatter(JsonFormatter())
+    log.addHandler(file_handler)
+    if log.level == logging.NOTSET or log.level > logging.INFO:
+        log.setLevel(logging.INFO)
 
     mlflow_run = None
     if cfg.mlflow:
@@ -171,6 +223,15 @@ def train(cfg: TrainConfig) -> TrainResult:
             | {"net_arch": str(cfg.net_arch)}
         )
 
+    log.info(
+        "training started",
+        extra={
+            "run": cfg.resolved_run_name,
+            "scenario": spec.name,
+            "timesteps": cfg.total_timesteps,
+            "seed": cfg.seed,
+        },
+    )
     try:
         vec_env = DummyVecEnv([lambda: make_env(spec, cfg) for _ in range(cfg.n_envs)])
         ppo = MaskablePPO(
@@ -198,7 +259,7 @@ def train(cfg: TrainConfig) -> TrainResult:
         )
         ppo.learn(
             total_timesteps=cfg.total_timesteps,
-            callback=CallbackList([validation, checkpoints]),
+            callback=CallbackList([validation, checkpoints, TrainingMetricsCallback(run_dir)]),
         )
 
         if validation.history[-1]["timesteps"] != ppo.num_timesteps:
@@ -235,6 +296,8 @@ def train(cfg: TrainConfig) -> TrainResult:
             wall_seconds=time.time() - start,
         )
     finally:
+        log.removeHandler(file_handler)
+        file_handler.close()
         if mlflow_run is not None:
             import mlflow
 

@@ -54,8 +54,22 @@ def get_experiment(
     return {
         **svc.out(exp).model_dump(mode="json"),
         "validation_curve": svc.curve(exp),
+        "training_curve": svc.training_curve(exp),
+        "elapsed_seconds": svc.elapsed_seconds(exp),
         "artifacts": svc.artifact_names(exp),
     }
+
+
+@router.get("/experiments/{exp_id}/logs")
+def get_experiment_logs(
+    exp_id: uuid.UUID,
+    tail: int = Query(200, ge=1, le=1000),
+    db: Session = Depends(get_db),
+    svc: ExperimentService = Depends(get_experiments),
+) -> dict[str, Any]:
+    """Last lines of the run's structured log (empty for runs trained before logs were kept)."""
+    exp = svc.get(db, exp_id)
+    return {"lines": svc.log_tail(exp, tail), "available": "train.log" in svc.artifact_names(exp)}
 
 
 @router.post("/experiments/{exp_id}/cancel", response_model=schemas.ExperimentOut)

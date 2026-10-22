@@ -143,6 +143,16 @@ def run(args: argparse.Namespace) -> None:
     log.info("comparing policies", extra={"n_test": len(test), "runs": len(rl_policies)})
     results = compare_policies(model, reward, val, test, rl_policies, include_posterior=inc_post)
 
+    results["metadata"] = {
+        "scenario": model.name,
+        "test_seed": cfg.test_seed,
+        "val_seed": cfg.val_seed,
+        "checkpoint": args.model,
+        "runs": [r.name for r in run_dirs],
+        "include_posterior": inc_post,
+        "reward": cfg.reward.model_dump(),
+    }
+
     # Exact reference (small scenarios only).
     try:
         exact = ExactPolicy(model, reward)

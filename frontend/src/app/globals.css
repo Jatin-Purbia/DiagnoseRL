@@ -1,49 +1,135 @@
 @import "tailwindcss";
 
+/* Class-based theming: next-themes toggles `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- design tokens ------------------------------------------------------------------
+   Light values live on :root, dark values on .dark. Components only use the semantic names
+   (bg-surface, text-muted, border-border, ...), never raw colours. */
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --elevated: #f0f3f9;
+  --border: #d8dfeb;
+  --ink: #0f172a;
+  --muted: #566277;
+  --primary: #4f46e5;
+  --primary-ink: #ffffff;
+  --secondary: #0e7490;
+  --success: #047857;
+  --warning: #b45309;
+  --critical: #dc2626;
+  --glow: rgba(79, 70, 229, 0.1);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.dark {
+  --bg: #090d15;
+  --surface: #111827;
+  --elevated: #182233;
+  --border: #263247;
+  --ink: #e6edf7;
+  --muted: #8fa0b8;
+  --primary: #6366f1;
+  --primary-ink: #ffffff;
+  --secondary: #22d3ee;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --critical: #ef4444;
+  --glow: rgba(99, 102, 241, 0.16);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+  --shadow-card: var(--shadow);
+}
+
+/* Three-panel playground layout: needs ~1400px so the timeline keeps a readable width. */
 @theme {
-  --color-bg: #0a0e14;
-  --color-panel: #101722;
-  --color-panel-2: #162133;
-  --color-line: #243149;
-  --color-ink: #e6edf7;
-  --color-muted: #94a3b8;
-  --color-accent: #4fd1c5;
-  --color-accent-ink: #052321;
-  --color-good: #4ade80;
-  --color-warn: #fbbf24;
-  --color-bad: #f87171;
-  --color-info: #60a5fa;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --breakpoint-pane: 87.5rem;
 }
 
 html {
+  color-scheme: light;
+}
+html.dark {
   color-scheme: dark;
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-ink);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A restrained glow behind the page header area in dark mode. */
+.page-glow {
+  background:
+    radial-gradient(60rem 22rem at 20% -6rem, var(--glow), transparent 70%),
+    var(--bg);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
+  border-radius: 6px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .fade-in {
-    animation: fade-in 220ms ease-out;
+::selection {
+  background: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* Thin, unobtrusive scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--elevated);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 7%, transparent), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after {
+    display: none;
   }
 }

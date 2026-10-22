@@ -14,18 +14,66 @@ description: Twelve application-level root causes with noisy, partially overlapp
 max_steps: 9
 
 faults:
-  - {id: db_unavailable,       name: Database unavailable,                  prior: 0.10}
-  - {id: db_pool_exhaustion,   name: Database connection pool exhaustion,   prior: 0.10}
-  - {id: memory_leak,          name: Memory leak,                           prior: 0.09}
-  - {id: cpu_saturation,       name: CPU saturation,                        prior: 0.09}
-  - {id: disk_full,            name: Disk full,                             prior: 0.07}
-  - {id: network_partition,    name: Network partition,                     prior: 0.06}
-  - {id: dns_failure,          name: DNS failure,                           prior: 0.07}
-  - {id: bad_env_config,       name: Misconfigured environment variables,   prior: 0.08}
-  - {id: bad_deployment,       name: Bad application deployment,            prior: 0.12}
-  - {id: cache_unavailable,    name: Cache service unavailable,             prior: 0.08}
-  - {id: auth_failure,         name: Authentication service failure,        prior: 0.07}
-  - {id: external_api_timeout, name: External API timeout,                  prior: 0.07}
+  - id: db_unavailable
+    name: Database unavailable
+    category: database
+    prior: 0.10
+    description: The primary database stops accepting connections, so every request that needs data fails.
+  - id: db_pool_exhaustion
+    name: Database connection pool exhaustion
+    category: database
+    prior: 0.10
+    description: All pooled connections are in use, so new requests queue and time out while the database itself is healthy.
+  - id: memory_leak
+    name: Memory leak
+    category: host
+    prior: 0.09
+    description: Memory use grows without bound until the service slows down or is killed.
+  - id: cpu_saturation
+    name: CPU saturation
+    category: host
+    prior: 0.09
+    description: CPU is fully utilised, which raises latency across the whole service.
+  - id: disk_full
+    name: Disk full
+    category: host
+    prior: 0.07
+    description: The volume fills up, so writes (logs, uploads, temp files) fail.
+  - id: network_partition
+    name: Network partition
+    category: network
+    prior: 0.06
+    description: Part of the network becomes unreachable, so several dependencies fail at once.
+  - id: dns_failure
+    name: DNS failure
+    category: network
+    prior: 0.07
+    description: Hostnames stop resolving, so services cannot find each other even though they are running.
+  - id: bad_env_config
+    name: Misconfigured environment variables
+    category: deployment
+    prior: 0.08
+    description: A wrong or missing configuration value (host, secret, flag) breaks the service after a release.
+  - id: bad_deployment
+    name: Bad application deployment
+    category: deployment
+    prior: 0.12
+    description: A faulty release introduces a defect that surfaces as errors and latency.
+  - id: cache_unavailable
+    name: Cache service unavailable
+    category: cache
+    prior: 0.08
+    description: The cache cluster is unreachable, so the load shifts onto slower backends.
+  - id: auth_failure
+    name: Authentication service failure
+    category: auth
+    prior: 0.07
+    description: Token validation or login stops working, so authenticated requests are rejected.
+  - id: external_api_timeout
+    name: External API timeout
+    category: external
+    prior: 0.07
+    description: A third-party dependency responds slowly or not at all, stalling requests that wait on it.
 
 tests:
   - id: db_health_probe

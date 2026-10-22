@@ -5,10 +5,26 @@ description: Four root causes and five tests; used to validate against the exact
 max_steps: 6
 
 faults:
-  - {id: db_down,    name: Database unavailable, prior: 0.35}
-  - {id: cpu_high,   name: CPU saturation,       prior: 0.25}
-  - {id: disk_full,  name: Disk full,            prior: 0.15}
-  - {id: bad_deploy, name: Bad deployment,       prior: 0.25}
+  - id: db_down
+    name: Database unavailable
+    category: database
+    prior: 0.35
+    description: The database stops accepting connections.
+  - id: cpu_high
+    name: CPU saturation
+    category: host
+    prior: 0.25
+    description: CPU is fully utilised, which raises latency.
+  - id: disk_full
+    name: Disk full
+    category: host
+    prior: 0.15
+    description: The volume fills up, so writes fail.
+  - id: bad_deploy
+    name: Bad deployment
+    category: deployment
+    prior: 0.25
+    description: A faulty release introduces a defect.
 
 tests:
   - id: db_probe

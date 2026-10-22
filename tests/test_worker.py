@@ -44,6 +44,16 @@ def test_worker_runs_training_registers_model_then_evaluates(tmp_path):
         assert done["progress_timesteps"] >= 1024
         assert done["validation_curve"]
         assert "summary.json" in done["artifacts"]
+        assert "train_metrics.jsonl" in done["artifacts"]
+        assert done["training_curve"], "training telemetry should be exposed"
+        assert {"timesteps", "ep_rew_mean"} <= set(done["training_curve"][-1])
+        assert done["elapsed_seconds"] is not None
+        assert done["elapsed_seconds"] > 0
+        logs = c.get(f"{API}/experiments/{exp['id']}/logs", params={"tail": 50}).json()
+        assert logs["available"] is True
+        assert any("training started" in line for line in logs["lines"])
+        assert c.get(f"{API}/experiments/{exp['id']}/logs", params={"tail": 0}).status_code == 422
+        assert c.get(f"{API}/experiments/{exp['id']}/artifacts/train.log").status_code == 200
         assert c.get(f"{API}/experiments/{exp['id']}/artifacts/summary.json").status_code == 200
 
         # the worker registered the trained model (not active until an admin activates it)
@@ -69,6 +79,9 @@ def test_worker_runs_training_registers_model_then_evaluates(tmp_path):
         assert c.get(f"{API}/evaluations/{ev['id']}").json()["status"] == "succeeded"
         results = c.get(f"{API}/evaluations/{ev['id']}/results").json()
         assert "cost_aware_bayes" in results["baselines"]
+        assert results["metadata"]["scenario"] == "small"
+        assert results["metadata"]["runs"] == [exp["run_name"]]
+        assert len(results["distributions"]["ppo"]["duration"]) == 50
         assert (
             c.get(f"{API}/evaluations/{ev['id']}/figures/reward_by_strategy.png").status_code == 200
         )

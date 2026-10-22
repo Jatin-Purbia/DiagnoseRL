@@ -10,11 +10,11 @@ result instead of failing or double-applying.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 import numpy as np
-from sqlalchemy import func, select
+from sqlalchemy import String, cast, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from diagnoserl import bayes
@@ -32,6 +32,13 @@ from diagnoserl.env import RewardConfig
 from diagnoserl.incident import sample_incident
 
 TERMINAL = {"declared", "truncated"}
+
+
+def _as_utc(value: datetime | None) -> datetime | None:
+    """SQLite returns naive datetimes; every stored timestamp is UTC."""
+    if value is not None and value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value
 
 
 class SessionService:
@@ -107,6 +114,7 @@ class SessionService:
             posterior_after=[float(x) for x in t.posterior_after],
             recommendation=t.recommendation,
             followed_recommendation=t.followed_recommendation,
+            executed_at=_as_utc(t.created_at),
         )
 
     def _view(self, row: orm.DiagnosticSession) -> schemas.SessionOut:
@@ -184,25 +192,43 @@ class SessionService:
         return self._view(self._load(db, session_id))
 
     def list_sessions(
-        self, db: Session, *, limit: int, offset: int, status: str | None = None
+        self,
+        db: Session,
+        *,
+        limit: int,
+        offset: int,
+        status: str | None = None,
+        scenario: str | None = None,
+        policy: str | None = None,
+        q: str | None = None,
     ) -> schemas.Page:
-        stmt = select(orm.DiagnosticSession)
-        count = select(func.count()).select_from(orm.DiagnosticSession)
+        filters = []
         if status:
-            stmt = stmt.where(orm.DiagnosticSession.status == status)
-            count = count.where(orm.DiagnosticSession.status == status)
+            filters.append(orm.DiagnosticSession.status == status)
+        if scenario:
+            filters.append(orm.DiagnosticSession.scenario == scenario)
+        if policy:
+            filters.append(orm.DiagnosticSession.policy == policy)
+        if q:
+            # search by id prefix (ids are UUIDs; compare on the canonical string form)
+            needle = q.strip().lower().replace("-", "")
+            filters.append(
+                func.replace(func.lower(cast(orm.DiagnosticSession.id, String)), "-", "").like(
+                    f"{needle}%"
+                )
+            )
+        stmt = select(orm.DiagnosticSession).where(*filters)
+        count = select(func.count()).select_from(orm.DiagnosticSession).where(*filters)
         rows = db.execute(
             stmt.order_by(orm.DiagnosticSession.created_at.desc()).limit(limit).offset(offset)
         ).scalars()
-        items = []
-        for r in rows:
-            full = self._load(db, r.id)
-            items.append(self._summary(full))
+        items = [self._summary(self._load(db, r.id)) for r in rows]
         return schemas.Page(
             items=items, total=db.execute(count).scalar_one(), limit=limit, offset=offset
         )
 
     def _summary(self, row: orm.DiagnosticSession) -> dict[str, Any]:
+        finished = row.status in TERMINAL
         return {
             "id": str(row.id),
             "scenario": row.scenario,
@@ -211,7 +237,12 @@ class SessionService:
             "steps": row.steps,
             "cost": row.cost,
             "elapsed": row.elapsed,
+            "total_reward": row.total_reward,
             "created_at": row.created_at.isoformat(),
+            "completed_at": row.completed_at.isoformat() if row.completed_at else None,
+            "declared_fault": row.declaration.fault_id if row.declaration else None,
+            # The true fault is only revealed once the investigation has ended.
+            "true_fault": row.true_fault if finished else None,
             "correct": row.declaration.correct if row.declaration else None,
         }
 

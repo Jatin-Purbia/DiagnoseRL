@@ -48,8 +48,15 @@ def get_scenario(name: str, reg: ScenarioRegistry = Depends(get_scenarios)) -> d
         **_summary(cfg).model_dump(),
         "outcomes": model.outcome_labels,
         "faults": [
-            {"id": fid, "name": fname, "prior": float(p)}
-            for fid, fname, p in zip(model.fault_ids, model.fault_names, model.prior, strict=True)
+            {
+                "id": f.id,
+                "name": f.name,
+                "description": f.description,
+                "category": f.category,
+                "prior": float(model.prior[model.fault_ids.index(f.id)]),
+            }
+            for f in cfg.faults
+            if f.enabled
         ],
         "tests": [
             {

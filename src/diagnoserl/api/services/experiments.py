@@ -21,7 +21,15 @@ from diagnoserl.training.config import TrainConfig
 
 MAX_TIMESTEPS = 5_000_000
 MAX_ENVS = 16
-ARTIFACT_FILES = ("config.json", "metrics.jsonl", "summary.json")
+ARTIFACT_FILES = (
+    "config.json",
+    "metrics.jsonl",
+    "summary.json",
+    "train_metrics.jsonl",
+    "train.log",
+)
+MAX_CURVE_POINTS = 500
+MAX_LOG_LINES = 1000
 FIGURE_RE = re.compile(r"^[A-Za-z0-9_\-]+\.png$")
 
 
@@ -118,6 +126,43 @@ class ExperimentService:
             for line in path.read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
+
+    def training_curve(self, exp: orm.TrainingExperiment) -> list[dict[str, Any]]:
+        """PPO's own diagnostics (reward, losses, entropy), thinned to a plottable size.
+
+        Empty for runs trained before telemetry existed (those only have validation metrics).
+        """
+        path = self.settings.runs_dir / exp.run_name / "train_metrics.jsonl"
+        if not path.is_file():
+            return []
+        rows = [
+            json.loads(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        if len(rows) > MAX_CURVE_POINTS:
+            step = len(rows) / MAX_CURVE_POINTS
+            rows = [rows[int(i * step)] for i in range(MAX_CURVE_POINTS)] + [rows[-1]]
+        return rows
+
+    def elapsed_seconds(self, exp: orm.TrainingExperiment) -> float | None:
+        """Wall-clock time the job has been (or was) running."""
+        if exp.started_at is None:
+            return None
+        end = exp.finished_at or orm.utcnow()
+        start = exp.started_at
+        if start.tzinfo is None and end.tzinfo is not None:  # SQLite returns naive datetimes
+            start = start.replace(tzinfo=end.tzinfo)
+        elif end.tzinfo is None and start.tzinfo is not None:
+            end = end.replace(tzinfo=start.tzinfo)
+        return max(0.0, (end - start).total_seconds())
+
+    def log_tail(self, exp: orm.TrainingExperiment, tail: int) -> list[str]:
+        path = self.settings.runs_dir / exp.run_name / "train.log"
+        if not path.is_file():
+            return []
+        lines = path.read_text(encoding="utf-8").splitlines()
+        return lines[-min(tail, MAX_LOG_LINES) :]
 
     def out(self, exp: orm.TrainingExperiment) -> schemas.ExperimentOut:
         curve = self.curve(exp) if exp.status in ("running", "succeeded", "failed") else []

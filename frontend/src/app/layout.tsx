@@ -1,22 +1,29 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Nav } from "@/components/Nav";
+import { AppShell } from "@/components/shell/AppShell";
+import { Providers } from "@/components/shell/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DiagnoseRL",
+  title: { default: "DiagnoseRL", template: "%s · DiagnoseRL" },
   description:
     "Adaptive, cost-aware fault diagnosis with Bayesian beliefs and reinforcement learning.",
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#090d15" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f6fb" },
+  ],
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen">
-        <Nav />
-        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 md:ml-56 md:max-w-none md:px-8">
-          {children}
-        </main>
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen" suppressHydrationWarning>
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );

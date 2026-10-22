@@ -1,5 +1,14 @@
-import { Playground } from "@/components/Playground";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Playground } from "@/features/playground/Playground";
+
+export const metadata: Metadata = { title: "Diagnostic Playground" };
 
 export default function PlaygroundPage() {
-  return <Playground />;
+  // useSearchParams (the session id lives in the URL) requires a Suspense boundary.
+  return (
+    <Suspense fallback={null}>
+      <Playground />
+    </Suspense>
+  );
 }

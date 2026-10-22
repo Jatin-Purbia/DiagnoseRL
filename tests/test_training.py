@@ -160,3 +160,26 @@ def test_validation_uses_fixed_incidents_not_training_stream(trained, small_mode
         x.fault != y.fault or not np.array_equal(x.outcomes, y.outcomes)
         for x, y in zip(a, test_set, strict=True)
     )
+
+
+def test_training_records_real_ppo_telemetry_and_a_log(tmp_path):
+    cfg = _tiny_cfg(tmp_path, total_timesteps=1536)  # 12 rollouts of 128 steps
+    result = train(cfg)
+    metrics = result.run_dir / "train_metrics.jsonl"
+    rows = [json.loads(line) for line in metrics.read_text().splitlines()]
+    assert rows, "telemetry file is empty"
+    steps = [r["timesteps"] for r in rows]
+    assert steps == sorted(steps)
+    last = rows[-1]
+    assert {"wall_seconds", "ep_rew_mean", "ep_len_mean"} <= set(last)
+    # losses come from SB3's logger: present after the first update, never invented before it
+    with_loss = [r for r in rows if "value_loss" in r]
+    assert with_loss, "no update diagnostics were recorded"
+    assert all({"policy_loss", "entropy_loss", "approx_kl"} <= set(r) for r in with_loss)
+    assert all(r["value_loss"] >= 0.0 for r in with_loss)
+    # reward/length are raw (unscaled) episode statistics
+    assert -40.0 < last["ep_rew_mean"] < 40.0
+    log_lines = (result.run_dir / "train.log").read_text().splitlines()
+    parsed = [json.loads(line) for line in log_lines]
+    assert parsed[0]["msg"] == "training started"
+    assert any(p["msg"] == "validation" for p in parsed)
