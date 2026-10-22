@@ -1,0 +1,67 @@
+# Small scenario (4 faults, 5 tests) sized so the exact dynamic-programming
+# reference solver is tractable: (outcomes + 1) ** tests = 4 ** 5 evidence states.
+name: small
+description: Four root causes and five tests; used to validate against the exact solver.
+max_steps: 6
+
+faults:
+  - {id: db_down,    name: Database unavailable, prior: 0.35}
+  - {id: cpu_high,   name: CPU saturation,       prior: 0.25}
+  - {id: disk_full,  name: Disk full,            prior: 0.15}
+  - {id: bad_deploy, name: Bad deployment,       prior: 0.25}
+
+tests:
+  - id: db_probe
+    name: Database probe
+    cost: 1
+    duration: 5
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.85, FAIL: 0.05, DEGRADED: 0.10}
+      overrides:
+        db_down:    {PASS: 0.05, FAIL: 0.85, DEGRADED: 0.10}
+        cpu_high:   {PASS: 0.55, FAIL: 0.10, DEGRADED: 0.35}
+
+  - id: cpu_check
+    name: CPU check
+    cost: 1
+    duration: 3
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.85, FAIL: 0.05, DEGRADED: 0.10}
+      overrides:
+        cpu_high:   {PASS: 0.05, FAIL: 0.80, DEGRADED: 0.15}
+        bad_deploy: {PASS: 0.50, FAIL: 0.15, DEGRADED: 0.35}
+
+  - id: disk_check
+    name: Disk check
+    cost: 1
+    duration: 3
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.92, FAIL: 0.03, DEGRADED: 0.05}
+      overrides:
+        disk_full: {PASS: 0.05, FAIL: 0.90, DEGRADED: 0.05}
+
+  - id: version_check
+    name: Deployment version check
+    cost: 1
+    duration: 4
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.90, FAIL: 0.04, DEGRADED: 0.06}
+      overrides:
+        bad_deploy: {PASS: 0.10, FAIL: 0.80, DEGRADED: 0.10}
+
+  - id: log_scan
+    name: Log scan (expensive, broad)
+    cost: 3
+    duration: 20
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.80, FAIL: 0.08, DEGRADED: 0.12}
+      overrides:
+        db_down:    {PASS: 0.10, FAIL: 0.60, DEGRADED: 0.30}
+        cpu_high:   {PASS: 0.40, FAIL: 0.20, DEGRADED: 0.40}
+        disk_full:  {PASS: 0.15, FAIL: 0.60, DEGRADED: 0.25}
+        bad_deploy: {PASS: 0.10, FAIL: 0.60, DEGRADED: 0.30}

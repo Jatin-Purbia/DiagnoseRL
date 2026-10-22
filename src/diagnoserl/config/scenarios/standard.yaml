@@ -1,0 +1,228 @@
+# Standard DiagnoseRL scenario: 12 root causes, 13 simulated diagnostic tests.
+#
+# Conventions
+#   * Outcomes: PASS (healthy), FAIL (clear failure), DEGRADED (partial signal).
+#   * `default` is the behaviour for faults that do NOT affect the test and
+#     includes background noise (false alarms). `overrides` lists the faults
+#     that change the test's behaviour.
+#   * Test outcomes are conditionally independent given the root cause.
+#   * Cost is in abstract resource units, duration in seconds.
+#   * The probabilities are hand-authored for the simulation. They are NOT
+#     measured from real systems (see docs/limitations.md).
+name: standard
+description: Twelve application-level root causes with noisy, partially overlapping diagnostics.
+max_steps: 9
+
+faults:
+  - {id: db_unavailable,       name: Database unavailable,                  prior: 0.10}
+  - {id: db_pool_exhaustion,   name: Database connection pool exhaustion,   prior: 0.10}
+  - {id: memory_leak,          name: Memory leak,                           prior: 0.09}
+  - {id: cpu_saturation,       name: CPU saturation,                        prior: 0.09}
+  - {id: disk_full,            name: Disk full,                             prior: 0.07}
+  - {id: network_partition,    name: Network partition,                     prior: 0.06}
+  - {id: dns_failure,          name: DNS failure,                           prior: 0.07}
+  - {id: bad_env_config,       name: Misconfigured environment variables,   prior: 0.08}
+  - {id: bad_deployment,       name: Bad application deployment,            prior: 0.12}
+  - {id: cache_unavailable,    name: Cache service unavailable,             prior: 0.08}
+  - {id: auth_failure,         name: Authentication service failure,        prior: 0.07}
+  - {id: external_api_timeout, name: External API timeout,                  prior: 0.07}
+
+tests:
+  - id: db_health_probe
+    name: Database health probe
+    category: database
+    cost: 1
+    duration: 5
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.88, FAIL: 0.04, DEGRADED: 0.08}
+      overrides:
+        db_unavailable:     {PASS: 0.03, FAIL: 0.90, DEGRADED: 0.07}
+        db_pool_exhaustion: {PASS: 0.30, FAIL: 0.15, DEGRADED: 0.55}
+        network_partition:  {PASS: 0.25, FAIL: 0.60, DEGRADED: 0.15}
+        dns_failure:        {PASS: 0.55, FAIL: 0.35, DEGRADED: 0.10}
+        memory_leak:        {PASS: 0.75, FAIL: 0.10, DEGRADED: 0.15}
+        cpu_saturation:     {PASS: 0.65, FAIL: 0.10, DEGRADED: 0.25}
+
+  - id: db_connection_latency
+    name: Database connection latency check
+    category: database
+    cost: 2
+    duration: 10
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.88, FAIL: 0.04, DEGRADED: 0.08}
+      overrides:
+        db_unavailable:     {PASS: 0.05, FAIL: 0.80, DEGRADED: 0.15}
+        db_pool_exhaustion: {PASS: 0.15, FAIL: 0.15, DEGRADED: 0.70}
+        cpu_saturation:     {PASS: 0.55, FAIL: 0.10, DEGRADED: 0.35}
+        network_partition:  {PASS: 0.20, FAIL: 0.50, DEGRADED: 0.30}
+        memory_leak:        {PASS: 0.70, FAIL: 0.10, DEGRADED: 0.20}
+        bad_deployment:     {PASS: 0.75, FAIL: 0.10, DEGRADED: 0.15}
+
+  - id: cpu_utilization
+    name: CPU utilization inspection
+    category: host
+    cost: 1
+    duration: 3
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.88, FAIL: 0.04, DEGRADED: 0.08}
+      overrides:
+        cpu_saturation:     {PASS: 0.05, FAIL: 0.80, DEGRADED: 0.15}
+        memory_leak:        {PASS: 0.55, FAIL: 0.10, DEGRADED: 0.35}
+        bad_deployment:     {PASS: 0.65, FAIL: 0.10, DEGRADED: 0.25}
+        db_pool_exhaustion: {PASS: 0.80, FAIL: 0.05, DEGRADED: 0.15}
+
+  - id: memory_utilization
+    name: Memory utilization inspection
+    category: host
+    cost: 1
+    duration: 3
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.88, FAIL: 0.04, DEGRADED: 0.08}
+      overrides:
+        memory_leak:        {PASS: 0.05, FAIL: 0.75, DEGRADED: 0.20}
+        cpu_saturation:     {PASS: 0.80, FAIL: 0.05, DEGRADED: 0.15}
+        bad_deployment:     {PASS: 0.65, FAIL: 0.10, DEGRADED: 0.25}
+        cache_unavailable:  {PASS: 0.80, FAIL: 0.05, DEGRADED: 0.15}
+
+  - id: disk_utilization
+    name: Disk utilization check
+    category: host
+    cost: 1
+    duration: 3
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.93, FAIL: 0.02, DEGRADED: 0.05}
+      overrides:
+        disk_full:   {PASS: 0.02, FAIL: 0.92, DEGRADED: 0.06}
+        memory_leak: {PASS: 0.85, FAIL: 0.05, DEGRADED: 0.10}
+
+  - id: dns_resolution
+    name: DNS resolution check
+    category: network
+    cost: 2
+    duration: 4
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.93, FAIL: 0.02, DEGRADED: 0.05}
+      overrides:
+        dns_failure:       {PASS: 0.03, FAIL: 0.88, DEGRADED: 0.09}
+        network_partition: {PASS: 0.25, FAIL: 0.55, DEGRADED: 0.20}
+        bad_env_config:    {PASS: 0.75, FAIL: 0.10, DEGRADED: 0.15}
+
+  - id: network_connectivity
+    name: Network connectivity test
+    category: network
+    cost: 2
+    duration: 6
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.92, FAIL: 0.03, DEGRADED: 0.05}
+      overrides:
+        network_partition:    {PASS: 0.05, FAIL: 0.85, DEGRADED: 0.10}
+        dns_failure:          {PASS: 0.60, FAIL: 0.15, DEGRADED: 0.25}
+        external_api_timeout: {PASS: 0.55, FAIL: 0.15, DEGRADED: 0.30}
+        db_unavailable:       {PASS: 0.85, FAIL: 0.05, DEGRADED: 0.10}
+
+  # Cheap, broad symptom check: almost every fault changes it, so it is a poor
+  # discriminator between faults but a good "is something wrong" signal.
+  - id: http_endpoint_health
+    name: HTTP endpoint health check
+    category: application
+    cost: 1
+    duration: 2
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.90, FAIL: 0.04, DEGRADED: 0.06}
+      overrides:
+        db_unavailable:       {PASS: 0.10, FAIL: 0.70, DEGRADED: 0.20}
+        db_pool_exhaustion:   {PASS: 0.20, FAIL: 0.30, DEGRADED: 0.50}
+        memory_leak:          {PASS: 0.25, FAIL: 0.25, DEGRADED: 0.50}
+        cpu_saturation:       {PASS: 0.20, FAIL: 0.25, DEGRADED: 0.55}
+        disk_full:            {PASS: 0.15, FAIL: 0.60, DEGRADED: 0.25}
+        network_partition:    {PASS: 0.10, FAIL: 0.70, DEGRADED: 0.20}
+        dns_failure:          {PASS: 0.25, FAIL: 0.50, DEGRADED: 0.25}
+        bad_env_config:       {PASS: 0.20, FAIL: 0.60, DEGRADED: 0.20}
+        bad_deployment:       {PASS: 0.15, FAIL: 0.55, DEGRADED: 0.30}
+        cache_unavailable:    {PASS: 0.25, FAIL: 0.20, DEGRADED: 0.55}
+        auth_failure:         {PASS: 0.20, FAIL: 0.60, DEGRADED: 0.20}
+        external_api_timeout: {PASS: 0.30, FAIL: 0.20, DEGRADED: 0.50}
+
+  # Expensive but informative: error patterns appear for most real faults.
+  - id: service_log_inspection
+    name: Service log inspection
+    category: application
+    cost: 4
+    duration: 30
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.80, FAIL: 0.08, DEGRADED: 0.12}
+      overrides:
+        db_unavailable:       {PASS: 0.10, FAIL: 0.60, DEGRADED: 0.30}
+        db_pool_exhaustion:   {PASS: 0.10, FAIL: 0.50, DEGRADED: 0.40}
+        memory_leak:          {PASS: 0.15, FAIL: 0.50, DEGRADED: 0.35}
+        cpu_saturation:       {PASS: 0.45, FAIL: 0.15, DEGRADED: 0.40}
+        disk_full:            {PASS: 0.15, FAIL: 0.60, DEGRADED: 0.25}
+        network_partition:    {PASS: 0.20, FAIL: 0.50, DEGRADED: 0.30}
+        dns_failure:          {PASS: 0.20, FAIL: 0.50, DEGRADED: 0.30}
+        bad_env_config:       {PASS: 0.10, FAIL: 0.65, DEGRADED: 0.25}
+        bad_deployment:       {PASS: 0.10, FAIL: 0.60, DEGRADED: 0.30}
+        cache_unavailable:    {PASS: 0.20, FAIL: 0.45, DEGRADED: 0.35}
+        auth_failure:         {PASS: 0.15, FAIL: 0.55, DEGRADED: 0.30}
+        external_api_timeout: {PASS: 0.25, FAIL: 0.25, DEGRADED: 0.50}
+
+  - id: deployment_version
+    name: Deployment version inspection
+    category: deployment
+    cost: 1
+    duration: 4
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.92, FAIL: 0.03, DEGRADED: 0.05}
+      overrides:
+        bad_deployment: {PASS: 0.05, FAIL: 0.85, DEGRADED: 0.10}
+        bad_env_config: {PASS: 0.50, FAIL: 0.15, DEGRADED: 0.35}
+
+  - id: cache_connectivity
+    name: Cache connectivity check
+    category: cache
+    cost: 1
+    duration: 2
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.93, FAIL: 0.02, DEGRADED: 0.05}
+      overrides:
+        cache_unavailable: {PASS: 0.02, FAIL: 0.90, DEGRADED: 0.08}
+        network_partition: {PASS: 0.30, FAIL: 0.50, DEGRADED: 0.20}
+        memory_leak:       {PASS: 0.80, FAIL: 0.05, DEGRADED: 0.15}
+
+  - id: auth_service_health
+    name: Authentication service health check
+    category: auth
+    cost: 1
+    duration: 2
+    outcomes: [PASS, FAIL, DEGRADED]
+    likelihood:
+      default: {PASS: 0.93, FAIL: 0.02, DEGRADED: 0.05}
+      overrides:
+        auth_failure:      {PASS: 0.03, FAIL: 0.88, DEGRADED: 0.09}
+        network_partition: {PASS: 0.35, FAIL: 0.45, DEGRADED: 0.20}
+        dns_failure:       {PASS: 0.50, FAIL: 0.30, DEGRADED: 0.20}
+        bad_env_config:    {PASS: 0.65, FAIL: 0.15, DEGRADED: 0.20}
+
+  - id: external_dependency_latency
+    name: External dependency latency inspection
+    category: network
+    cost: 2
+    duration: 8
+    outcomes: [PASS, FAIL, DEGRADED]
+    requires: [network_connectivity]   # only meaningful once basic connectivity is known
+    likelihood:
+      default: {PASS: 0.90, FAIL: 0.03, DEGRADED: 0.07}
+      overrides:
+        external_api_timeout: {PASS: 0.05, FAIL: 0.60, DEGRADED: 0.35}
+        network_partition:    {PASS: 0.40, FAIL: 0.30, DEGRADED: 0.30}
+        dns_failure:          {PASS: 0.65, FAIL: 0.15, DEGRADED: 0.20}

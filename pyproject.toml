@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diagnoserl"
+version = "0.1.0"
+description = "Reinforcement learning for cost-aware software fault diagnosis."
+readme = "README.md"
+requires-python = ">=3.11"
+# Pinned, verified versions live in requirements.txt.
+dependencies = [
+    "gymnasium",
+    "numpy",
+    "pydantic",
+    "PyYAML",
+]
+
+[project.optional-dependencies]
+rl = ["torch", "stable_baselines3", "sb3_contrib", "tensorboard", "mlflow"]
+analysis = ["pandas", "scipy", "scikit-learn", "matplotlib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+diagnoserl = ["config/scenarios/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["slow: long-running tests (RL training)"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header"]
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["stable_baselines3.*", "sb3_contrib.*", "scipy.*", "sklearn.*", "mlflow.*", "matplotlib.*"]
+ignore_missing_imports = true
