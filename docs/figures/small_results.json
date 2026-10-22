@@ -1,0 +1,842 @@
+{
+  "n_test_episodes": 3000,
+  "n_val_episodes": 1000,
+  "reward_config": {
+    "reward_correct": 10.0,
+    "penalty_wrong": 10.0,
+    "penalty_timeout": 10.0,
+    "lambda_cost": 0.5,
+    "lambda_time": 0.5
+  },
+  "tuned_on_validation": {
+    "fixed_order": 4,
+    "random": 0.1,
+    "info_gain": 0.8,
+    "cost_aware_bayes": 1
+  },
+  "baselines": {
+    "fixed_order": {
+      "summary": {
+        "n_episodes": 3000,
+        "accuracy": 0.882,
+        "incorrect_rate": 0.118,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 4.0,
+        "mean_cost": 4.0,
+        "mean_duration": 15.0,
+        "median_duration": 15.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.0,
+        "mean_reward": 6.598333333333334,
+        "std_reward": 6.453238057529133,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.8805841924398625,
+            "recall": 0.9259259259259259
+          },
+          "cpu_high": {
+            "precision": 0.8405228758169935,
+            "recall": 0.8654104979811574
+          },
+          "disk_full": {
+            "precision": 0.9045226130653267,
+            "recall": 0.8633093525179856
+          },
+          "bad_deploy": {
+            "precision": 0.9182763744427934,
+            "recall": 0.8431105047748977
+          }
+        },
+        "confusion_matrix": [
+          [
+            1025,
+            67,
+            6,
+            9,
+            0
+          ],
+          [
+            47,
+            643,
+            15,
+            38,
+            0
+          ],
+          [
+            37,
+            12,
+            360,
+            8,
+            0
+          ],
+          [
+            55,
+            43,
+            17,
+            618,
+            0
+          ]
+        ]
+      },
+      "reward_ci": [
+        6.365,
+        6.825166666666664
+      ]
+    },
+    "random": {
+      "summary": {
+        "n_episodes": 15000,
+        "accuracy": 0.7748,
+        "incorrect_rate": 0.2252,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 3.666733333333333,
+        "mean_cost": 5.128466666666666,
+        "mean_duration": 25.626666666666665,
+        "median_duration": 35.0,
+        "p90_duration": 35.0,
+        "p95_duration": 35.0,
+        "mean_reward": 4.000588888888889,
+        "std_reward": 8.0817932360431,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.7050034270047978,
+            "recall": 0.9291779584462512
+          },
+          "cpu_high": {
+            "precision": 0.8265338901381304,
+            "recall": 0.6925975773889637
+          },
+          "disk_full": {
+            "precision": 0.8785166240409207,
+            "recall": 0.6589928057553956
+          },
+          "bad_deploy": {
+            "precision": 0.8361955085865258,
+            "recall": 0.6908594815825375
+          }
+        },
+        "confusion_matrix": [
+          [
+            5143,
+            226,
+            51,
+            115,
+            0
+          ],
+          [
+            794,
+            2573,
+            50,
+            298,
+            0
+          ],
+          [
+            535,
+            93,
+            1374,
+            83,
+            0
+          ],
+          [
+            823,
+            221,
+            89,
+            2532,
+            0
+          ]
+        ]
+      },
+      "reward_ci": [
+        3.790735458333334,
+        4.2135141944444445
+      ]
+    },
+    "info_gain": {
+      "summary": {
+        "n_episodes": 3000,
+        "accuracy": 0.871,
+        "incorrect_rate": 0.129,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.462,
+        "mean_cost": 2.675333333333333,
+        "mean_duration": 11.639333333333333,
+        "median_duration": 8.0,
+        "p90_duration": 35.0,
+        "p95_duration": 35.0,
+        "mean_reward": 6.683127777777777,
+        "std_reward": 6.841551400542788,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.8371182458888019,
+            "recall": 0.9656729900632339
+          },
+          "cpu_high": {
+            "precision": 0.8798798798798799,
+            "recall": 0.7886944818304172
+          },
+          "disk_full": {
+            "precision": 0.8880778588807786,
+            "recall": 0.8752997601918465
+          },
+          "bad_deploy": {
+            "precision": 0.9179566563467493,
+            "recall": 0.8090040927694406
+          }
+        },
+        "confusion_matrix": [
+          [
+            1069,
+            24,
+            6,
+            8,
+            0
+          ],
+          [
+            100,
+            586,
+            15,
+            42,
+            0
+          ],
+          [
+            38,
+            11,
+            365,
+            3,
+            0
+          ],
+          [
+            70,
+            45,
+            25,
+            593,
+            0
+          ]
+        ]
+      },
+      "reward_ci": [
+        6.435420347222222,
+        6.926147291666667
+      ]
+    },
+    "cost_aware_bayes": {
+      "summary": {
+        "n_episodes": 3000,
+        "accuracy": 0.8886666666666667,
+        "incorrect_rate": 0.11133333333333334,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.817,
+        "mean_cost": 2.917,
+        "mean_duration": 11.795333333333334,
+        "median_duration": 12.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.649999999996453,
+        "mean_reward": 6.992283333333334,
+        "std_reward": 6.3619171912236,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.875,
+            "recall": 0.95483288166215
+          },
+          "cpu_high": {
+            "precision": 0.8654104979811574,
+            "recall": 0.8654104979811574
+          },
+          "disk_full": {
+            "precision": 0.8880778588807786,
+            "recall": 0.8752997601918465
+          },
+          "bad_deploy": {
+            "precision": 0.9420062695924765,
+            "recall": 0.819918144611187
+          }
+        },
+        "confusion_matrix": [
+          [
+            1057,
+            37,
+            6,
+            7,
+            0
+          ],
+          [
+            58,
+            643,
+            15,
+            27,
+            0
+          ],
+          [
+            38,
+            11,
+            365,
+            3,
+            0
+          ],
+          [
+            55,
+            52,
+            25,
+            601,
+            0
+          ]
+        ]
+      },
+      "reward_ci": [
+        6.7604490972222235,
+        7.217074722222223
+      ]
+    }
+  },
+  "rl": {
+    "per_seed": {
+      "small_seed0": {
+        "accuracy": 0.8656666666666667,
+        "incorrect_rate": 0.13433333333333333,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.6013333333333333,
+        "mean_cost": 2.622,
+        "mean_duration": 9.136,
+        "median_duration": 10.0,
+        "p90_duration": 15.0,
+        "mean_reward": 6.6479333333333335
+      },
+      "small_seed1": {
+        "accuracy": 0.8753333333333333,
+        "incorrect_rate": 0.12466666666666666,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.9326666666666665,
+        "mean_cost": 2.936,
+        "mean_duration": 10.161666666666667,
+        "median_duration": 10.0,
+        "p90_duration": 15.0,
+        "mean_reward": 6.7632916666666665
+      },
+      "small_seed2": {
+        "accuracy": 0.879,
+        "incorrect_rate": 0.121,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.833,
+        "mean_cost": 2.917,
+        "mean_duration": 11.730333333333334,
+        "median_duration": 12.0,
+        "p90_duration": 15.0,
+        "mean_reward": 6.800575000000001
+      }
+    },
+    "per_seed_full": {
+      "small_seed0": {
+        "n_episodes": 3000,
+        "accuracy": 0.8656666666666667,
+        "incorrect_rate": 0.13433333333333333,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.6013333333333333,
+        "mean_cost": 2.622,
+        "mean_duration": 9.136,
+        "median_duration": 10.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.0,
+        "mean_reward": 6.6479333333333335,
+        "std_reward": 6.824156732509257,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.897126969416126,
+            "recall": 0.8744354110207768
+          },
+          "cpu_high": {
+            "precision": 0.8539638386648123,
+            "recall": 0.8263795423956931
+          },
+          "disk_full": {
+            "precision": 0.80625,
+            "recall": 0.9280575539568345
+          },
+          "bad_deploy": {
+            "precision": 0.8698060941828255,
+            "recall": 0.8567530695770805
+          }
+        },
+        "confusion_matrix": [
+          [
+            968,
+            61,
+            39,
+            39,
+            0
+          ],
+          [
+            48,
+            614,
+            28,
+            53,
+            0
+          ],
+          [
+            20,
+            8,
+            387,
+            2,
+            0
+          ],
+          [
+            43,
+            36,
+            26,
+            628,
+            0
+          ]
+        ]
+      },
+      "small_seed1": {
+        "n_episodes": 3000,
+        "accuracy": 0.8753333333333333,
+        "incorrect_rate": 0.12466666666666666,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.9326666666666665,
+        "mean_cost": 2.936,
+        "mean_duration": 10.161666666666667,
+        "median_duration": 10.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.0,
+        "mean_reward": 6.7632916666666665,
+        "std_reward": 6.595247204670675,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.8915770609318996,
+            "recall": 0.8988256549232159
+          },
+          "cpu_high": {
+            "precision": 0.8453333333333334,
+            "recall": 0.8532974427994616
+          },
+          "disk_full": {
+            "precision": 0.80625,
+            "recall": 0.9280575539568345
+          },
+          "bad_deploy": {
+            "precision": 0.9327217125382263,
+            "recall": 0.8321964529331515
+          }
+        },
+        "confusion_matrix": [
+          [
+            995,
+            65,
+            39,
+            8,
+            0
+          ],
+          [
+            46,
+            634,
+            28,
+            35,
+            0
+          ],
+          [
+            21,
+            8,
+            387,
+            1,
+            0
+          ],
+          [
+            54,
+            43,
+            26,
+            610,
+            0
+          ]
+        ]
+      },
+      "small_seed2": {
+        "n_episodes": 3000,
+        "accuracy": 0.879,
+        "incorrect_rate": 0.121,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.833,
+        "mean_cost": 2.917,
+        "mean_duration": 11.730333333333334,
+        "median_duration": 12.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.0,
+        "mean_reward": 6.800575000000001,
+        "std_reward": 6.6002402249698475,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.8805841924398625,
+            "recall": 0.9259259259259259
+          },
+          "cpu_high": {
+            "precision": 0.8387942332896461,
+            "recall": 0.8613728129205922
+          },
+          "disk_full": {
+            "precision": 0.8880778588807786,
+            "recall": 0.8752997601918465
+          },
+          "bad_deploy": {
+            "precision": 0.9169184290030211,
+            "recall": 0.8281036834924966
+          }
+        },
+        "confusion_matrix": [
+          [
+            1025,
+            65,
+            6,
+            11,
+            0
+          ],
+          [
+            47,
+            640,
+            15,
+            41,
+            0
+          ],
+          [
+            37,
+            12,
+            365,
+            3,
+            0
+          ],
+          [
+            55,
+            46,
+            25,
+            607,
+            0
+          ]
+        ]
+      }
+    },
+    "aggregate": {
+      "accuracy": {
+        "mean": 0.8733333333333334,
+        "std": 0.006887992773257255
+      },
+      "incorrect_rate": {
+        "mean": 0.12666666666666668,
+        "std": 0.006887992773257277
+      },
+      "no_diagnosis_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "mean_tests": {
+        "mean": 2.789,
+        "std": 0.16999248349396054
+      },
+      "mean_cost": {
+        "mean": 2.8249999999999997,
+        "std": 0.17605964898295123
+      },
+      "mean_duration": {
+        "mean": 10.342666666666666,
+        "std": 1.3066032722716996
+      },
+      "median_duration": {
+        "mean": 10.666666666666666,
+        "std": 1.1547005383792517
+      },
+      "p90_duration": {
+        "mean": 15.0,
+        "std": 0.0
+      },
+      "mean_reward": {
+        "mean": 6.737266666666667,
+        "std": 0.0795791748477232
+      }
+    },
+    "seed_averaged_reward_ci": [
+      6.512343125,
+      6.960744861111111
+    ]
+  },
+  "paired_rl_minus_baseline": {
+    "fixed_order": {
+      "mean_diff": 0.13893333333333305,
+      "ci_low": 0.04576627314814787,
+      "ci_high": 0.23645574074074047,
+      "significant": true
+    },
+    "random": {
+      "mean_diff": 2.7366777777777775,
+      "ci_low": 2.555205888888889,
+      "ci_high": 2.9179748611111105,
+      "significant": true
+    },
+    "info_gain": {
+      "mean_diff": 0.05413888888888872,
+      "ci_low": -0.12712754629629644,
+      "ci_high": 0.240428009259259,
+      "significant": false
+    },
+    "cost_aware_bayes": {
+      "mean_diff": -0.25501666666666645,
+      "ci_low": -0.3793374768518516,
+      "ci_high": -0.12997157407407386,
+      "significant": true
+    }
+  },
+  "sweeps": [
+    {
+      "family": "fixed_order",
+      "param": 0,
+      "accuracy": 0.369,
+      "mean_cost": 0.0,
+      "mean_tests": 0.0,
+      "mean_duration": 0.0,
+      "mean_reward": -2.62
+    },
+    {
+      "family": "fixed_order",
+      "param": 1,
+      "accuracy": 0.6096666666666667,
+      "mean_cost": 1.0,
+      "mean_tests": 1.0,
+      "mean_duration": 5.0,
+      "mean_reward": 1.9016666666666675
+    },
+    {
+      "family": "fixed_order",
+      "param": 2,
+      "accuracy": 0.707,
+      "mean_cost": 2.0,
+      "mean_tests": 2.0,
+      "mean_duration": 8.0,
+      "mean_reward": 3.606666666666668
+    },
+    {
+      "family": "fixed_order",
+      "param": 3,
+      "accuracy": 0.8186666666666667,
+      "mean_cost": 3.0,
+      "mean_tests": 3.0,
+      "mean_duration": 11.0,
+      "mean_reward": 5.598333333333332
+    },
+    {
+      "family": "fixed_order",
+      "param": 4,
+      "accuracy": 0.882,
+      "mean_cost": 4.0,
+      "mean_tests": 4.0,
+      "mean_duration": 15.0,
+      "mean_reward": 6.598333333333334
+    },
+    {
+      "family": "fixed_order",
+      "param": 5,
+      "accuracy": 0.8913333333333333,
+      "mean_cost": 7.0,
+      "mean_tests": 5.0,
+      "mean_duration": 35.0,
+      "mean_reward": 5.785
+    },
+    {
+      "family": "fixed_order",
+      "param": 6,
+      "accuracy": 0.8913333333333333,
+      "mean_cost": 7.0,
+      "mean_tests": 5.0,
+      "mean_duration": 35.0,
+      "mean_reward": 5.785
+    },
+    {
+      "family": "fixed_order",
+      "param": 7,
+      "accuracy": 0.8913333333333333,
+      "mean_cost": 7.0,
+      "mean_tests": 5.0,
+      "mean_duration": 35.0,
+      "mean_reward": 5.785
+    },
+    {
+      "family": "fixed_order",
+      "param": 8,
+      "accuracy": 0.8913333333333333,
+      "mean_cost": 7.0,
+      "mean_tests": 5.0,
+      "mean_duration": 35.0,
+      "mean_reward": 5.785
+    },
+    {
+      "family": "random",
+      "param": 0.1,
+      "accuracy": 0.7748,
+      "mean_cost": 5.128466666666666,
+      "mean_tests": 3.666733333333333,
+      "mean_duration": 25.626666666666665,
+      "mean_reward": 4.000588888888889
+    },
+    {
+      "family": "random",
+      "param": 0.2,
+      "accuracy": 0.6870666666666667,
+      "mean_cost": 3.7655333333333334,
+      "mean_tests": 2.6944666666666666,
+      "mean_duration": 18.803866666666668,
+      "mean_reward": 2.643647777777778
+    },
+    {
+      "family": "random",
+      "param": 0.3,
+      "accuracy": 0.6136,
+      "mean_cost": 2.7051333333333334,
+      "mean_tests": 1.9379333333333333,
+      "mean_duration": 13.498333333333333,
+      "mean_reward": 1.4836861111111115
+    },
+    {
+      "family": "random",
+      "param": 0.5,
+      "accuracy": 0.5098,
+      "mean_cost": 1.362,
+      "mean_tests": 0.9754666666666667,
+      "mean_duration": 6.7972,
+      "mean_reward": -0.20092999999999991
+    },
+    {
+      "family": "info_gain",
+      "param": 0.5,
+      "accuracy": 0.7176666666666667,
+      "mean_cost": 1.523,
+      "mean_tests": 1.5203333333333333,
+      "mean_duration": 6.607333333333333,
+      "mean_reward": 3.934316666666667
+    },
+    {
+      "family": "info_gain",
+      "param": 0.7,
+      "accuracy": 0.865,
+      "mean_cost": 2.2436666666666665,
+      "mean_tests": 2.213,
+      "mean_duration": 9.339666666666666,
+      "mean_reward": 6.6925638888888885
+    },
+    {
+      "family": "info_gain",
+      "param": 0.8,
+      "accuracy": 0.871,
+      "mean_cost": 2.675333333333333,
+      "mean_tests": 2.462,
+      "mean_duration": 11.639333333333333,
+      "mean_reward": 6.683127777777777
+    },
+    {
+      "family": "info_gain",
+      "param": 0.9,
+      "accuracy": 0.887,
+      "mean_cost": 3.6193333333333335,
+      "mean_tests": 3.1246666666666667,
+      "mean_duration": 16.105,
+      "mean_reward": 6.734152777777779
+    },
+    {
+      "family": "info_gain",
+      "param": 0.95,
+      "accuracy": 0.89,
+      "mean_cost": 4.376333333333333,
+      "mean_tests": 3.743,
+      "mean_duration": 19.362333333333332,
+      "mean_reward": 6.5865527777777775
+    },
+    {
+      "family": "info_gain",
+      "param": 0.99,
+      "accuracy": 0.8913333333333333,
+      "mean_cost": 6.34,
+      "mean_tests": 4.78,
+      "mean_duration": 30.6,
+      "mean_reward": 6.005
+    },
+    {
+      "family": "cost_aware_bayes",
+      "param": 1,
+      "accuracy": 0.8886666666666667,
+      "mean_cost": 2.917,
+      "mean_tests": 2.817,
+      "mean_duration": 11.795333333333334,
+      "mean_reward": 6.992283333333334
+    },
+    {
+      "family": "cost_aware_bayes",
+      "param": 2,
+      "accuracy": 0.8926666666666667,
+      "mean_cost": 3.2063333333333333,
+      "mean_tests": 3.078333333333333,
+      "mean_duration": 12.804,
+      "mean_reward": 6.998844444444444
+    }
+  ],
+  "reference": {
+    "exact": {
+      "optimal_value": 6.951555508333334,
+      "summary": {
+        "n_episodes": 3000,
+        "accuracy": 0.889,
+        "incorrect_rate": 0.111,
+        "no_diagnosis_rate": 0.0,
+        "mean_tests": 2.756,
+        "mean_cost": 2.8553333333333333,
+        "mean_duration": 11.724,
+        "median_duration": 9.0,
+        "p90_duration": 15.0,
+        "p95_duration": 15.0,
+        "mean_reward": 7.011011111111111,
+        "std_reward": 6.359239077592599,
+        "per_fault": {
+          "db_down": {
+            "precision": 0.875,
+            "recall": 0.95483288166215
+          },
+          "cpu_high": {
+            "precision": 0.8654104979811574,
+            "recall": 0.8654104979811574
+          },
+          "disk_full": {
+            "precision": 0.918848167539267,
+            "recall": 0.841726618705036
+          },
+          "bad_deploy": {
+            "precision": 0.9235382308845578,
+            "recall": 0.8403819918144612
+          }
+        },
+        "confusion_matrix": [
+          [
+            1057,
+            37,
+            6,
+            7,
+            0
+          ],
+          [
+            58,
+            643,
+            15,
+            27,
+            0
+          ],
+          [
+            38,
+            11,
+            351,
+            17,
+            0
+          ],
+          [
+            55,
+            52,
+            10,
+            616,
+            0
+          ]
+        ]
+      }
+    }
+  }
+}

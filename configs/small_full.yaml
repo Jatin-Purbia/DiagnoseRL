@@ -1,0 +1,18 @@
+# PPO on the small scenario, used to measure the gap to the exact (dynamic-programming) optimum.
+#   python -m diagnoserl.training.train --config configs/small_full.yaml --seed 0 --run-name small_seed0
+scenario: small
+seed: 0
+total_timesteps: 500000
+n_envs: 8
+n_steps: 128
+batch_size: 256
+n_epochs: 10
+learning_rate: 0.0005
+gamma: 1.0
+ent_coef: 0.05
+net_arch: [128, 128]
+eval_freq: 25000
+checkpoint_freq: 250000
+n_val_episodes: 500
+output_dir: artifacts/runs
+mlflow: false

@@ -1,0 +1,96 @@
+# Local deployment: PostgreSQL, migrations, API, training/evaluation worker, frontend.
+#
+#   cp .env.example .env     # then set the two required secrets
+#   docker compose up --build
+#   docker compose --profile mlflow up --build   # also starts the MLflow UI
+#
+# Ports: frontend 3000, API 8000 (docs at /docs), MLflow 5000 (profile "mlflow").
+
+x-backend: &backend
+  build: .
+  image: diagnoserl-backend:local
+  environment: &backend-env
+    DIAGNOSERL_DATABASE_URL: postgresql+psycopg://diagnoserl:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/diagnoserl
+    DIAGNOSERL_ADMIN_API_KEY: ${DIAGNOSERL_ADMIN_API_KEY:?set DIAGNOSERL_ADMIN_API_KEY in .env}
+    DIAGNOSERL_CORS_ORIGINS: '["http://localhost:3000"]'
+  volumes:
+    - artifacts:/artifacts
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: diagnoserl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: diagnoserl
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U diagnoserl -d diagnoserl"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  migrate:
+    <<: *backend
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    stop_grace_period: 20s
+
+  worker:
+    <<: *backend
+    command: ["python", "-m", "diagnoserl.api.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    # Give an in-flight job time to finish on shutdown; unfinished jobs are marked failed on restart.
+    stop_grace_period: 60s
+    healthcheck:
+      disable: true
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    image: diagnoserl-frontend:local
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  mlflow:
+    <<: *backend
+    profiles: ["mlflow"]
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=sqlite:////artifacts/mlflow.db
+      - --default-artifact-root=/artifacts/mlflow-artifacts
+    ports:
+      - "5000:5000"
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  artifacts:

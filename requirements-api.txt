@@ -1,0 +1,8 @@
+# Backend (FastAPI) dependencies, in addition to requirements.txt.
+-r requirements.txt
+fastapi==0.156.3
+uvicorn==0.54.0
+SQLAlchemy==2.1.5
+alembic==1.20.0
+psycopg[binary]==3.3.6
+httpx==0.28.1   # test client

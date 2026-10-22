@@ -1,0 +1,21 @@
+# Full experiment configuration (standard 12-fault scenario).
+# Hyper-parameters were chosen on the validation incident set only (see
+# IMPLEMENTATION_PLAN.md, "Findings"). The test set (test_seed) is not used here.
+# Run several seeds, e.g.:
+#   python -m diagnoserl.training.train --config configs/full.yaml --seed 0
+scenario: standard
+seed: 0
+total_timesteps: 2000000
+n_envs: 8
+n_steps: 128
+batch_size: 256
+n_epochs: 10
+learning_rate: 0.0005
+gamma: 1.0
+ent_coef: 0.05      # higher than the SB3 default: 0.01 collapses to "one test, then declare"
+net_arch: [128, 128]
+eval_freq: 50000
+checkpoint_freq: 250000
+n_val_episodes: 500
+output_dir: artifacts/runs
+mlflow: true

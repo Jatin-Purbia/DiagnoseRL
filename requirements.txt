@@ -1,0 +1,23 @@
+# Runtime dependencies for the DiagnoseRL core (simulation, Bayesian engine,
+# baselines, RL training, evaluation). Versions verified together on
+# Python 3.12 (Windows, CPU).
+#
+# torch: install the CPU build first to avoid the large CUDA download:
+#   pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+gymnasium==1.4.0
+stable_baselines3==2.9.0
+sb3_contrib==2.9.0
+numpy==2.5.4
+pandas==3.0.6
+scipy==1.18.1
+scikit-learn==1.9.1
+PyYAML==6.0.3
+pydantic==2.14.1
+pydantic-settings==2.16.1
+matplotlib==3.11.2
+tensorboard==2.21.0
+mlflow==3.17.2
+# Note: torch 2.14.1 fails to initialise (WinError 1114) when the Python base
+# interpreter ships an old MSVC runtime (e.g. Anaconda's 14.29 msvcp140.dll).
+# 2.8.0 is the oldest version stable-baselines3 2.9 accepts and works there.
