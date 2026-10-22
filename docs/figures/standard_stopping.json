@@ -1,0 +1,62 @@
+{
+  "fixed_order": {
+    "mean_tests": 8.0,
+    "std_tests": 0.0,
+    "p10_tests": 8.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.5873328615363589,
+    "accuracy_low_confidence_half": 0.36936936936936937,
+    "accuracy_high_confidence_half": 0.7852147852147852,
+    "tests_vs_confidence_correlation": 0.0
+  },
+  "info_gain": {
+    "mean_tests": 6.1625,
+    "std_tests": 1.950126982435711,
+    "p10_tests": 3.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.724950242445989,
+    "accuracy_low_confidence_half": 0.5812053115423902,
+    "accuracy_high_confidence_half": 0.8765915768854065,
+    "tests_vs_confidence_correlation": -0.5990794999013339
+  },
+  "cost_aware_bayes": {
+    "mean_tests": 6.099,
+    "std_tests": 1.7682653593820685,
+    "p10_tests": 3.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.7393799651139541,
+    "accuracy_low_confidence_half": 0.602,
+    "accuracy_high_confidence_half": 0.877,
+    "tests_vs_confidence_correlation": -0.5969413276356632
+  },
+  "full_seed0": {
+    "mean_tests": 5.7715,
+    "std_tests": 1.8601122973840694,
+    "p10_tests": 2.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.7081193779324151,
+    "accuracy_low_confidence_half": 0.4827956989247312,
+    "accuracy_high_confidence_half": 0.8626168224299066,
+    "tests_vs_confidence_correlation": -0.47627716096271355
+  },
+  "full_seed1": {
+    "mean_tests": 5.696,
+    "std_tests": 1.7992227770069638,
+    "p10_tests": 3.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.6937593677353511,
+    "accuracy_low_confidence_half": 0.5495867768595041,
+    "accuracy_high_confidence_half": 0.8381782945736435,
+    "tests_vs_confidence_correlation": -0.3846362208209696
+  },
+  "full_seed2": {
+    "mean_tests": 5.284,
+    "std_tests": 2.2176119817160815,
+    "p10_tests": 1.0,
+    "p90_tests": 8.0,
+    "mean_confidence_at_declaration": 0.6849709843007442,
+    "accuracy_low_confidence_half": 0.497787610619469,
+    "accuracy_high_confidence_half": 0.8257299270072993,
+    "tests_vs_confidence_correlation": -0.15174413966322534
+  }
+}
