@@ -40,6 +40,7 @@ npm run dev                                 # http://localhost:3000
 ```
 
 In the UI, enter the same admin key in the sidebar to start training or activate a model.
+The worker (step 3) is only needed for training/evaluation jobs.
 
 ## Train and evaluate (command line)
 
