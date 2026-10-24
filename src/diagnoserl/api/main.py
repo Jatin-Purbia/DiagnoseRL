@@ -55,7 +55,11 @@ def create_app(settings: Settings | None = None, *, create_tables: bool = False)
     app.state.experiments = ExperimentService(settings, scenarios_registry)
     app.state.limiter = SlidingWindowLimiter(limit=settings.expensive_rate_limit_per_minute)
 
-    app.add_middleware(TimeoutMiddleware, seconds=settings.request_timeout_seconds)
+    app.add_middleware(
+        TimeoutMiddleware,
+        seconds=settings.request_timeout_seconds,
+        max_concurrent=settings.max_concurrent_requests,
+    )
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
     app.add_middleware(
         CORSMiddleware,

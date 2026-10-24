@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
     max_body_bytes: int = 1_000_000
     request_timeout_seconds: float = 30.0
+    # Caps in-flight requests so a pile-up of timed-out-but-still-running sync
+    # handlers can't silently starve the thread pool; new requests fail fast
+    # with 503 once this many are already in flight.
+    max_concurrent_requests: int = 100
     # Expensive operations (training / evaluation) per client per minute.
     expensive_rate_limit_per_minute: int = 6
     worker_poll_seconds: float = 2.0

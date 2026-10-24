@@ -106,19 +106,36 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
 
 
 class TimeoutMiddleware(BaseHTTPMiddleware):
-    """Return 504 if a request takes longer than ``seconds``."""
+    """Return 504 if a request takes longer than ``seconds``.
 
-    def __init__(self, app, seconds: float) -> None:  # type: ignore[no-untyped-def]
+    Route handlers are sync ``def`` functions, so Starlette runs them on a
+    worker thread; cancelling the ``await`` on timeout does not stop that
+    thread, which keeps running until the handler itself returns. Without a
+    cap, a burst of slow requests would each occupy a thread-pool slot well
+    past their own timeout, eventually starving unrelated requests even
+    though every individual request "timed out" correctly. ``max_concurrent``
+    bounds how many requests may be in flight at once; once at capacity,
+    new requests fail fast with 503 instead of queueing behind stuck ones.
+    """
+
+    def __init__(self, app, seconds: float, max_concurrent: int = 100) -> None:  # type: ignore[no-untyped-def]
         super().__init__(app)
         self.seconds = seconds
+        self.max_concurrent = max_concurrent
+        self._inflight = 0
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
+        if self._inflight >= self.max_concurrent:
+            return _json_error(503, "server_busy", "too many in-flight requests")
+        self._inflight += 1
         try:
             return await asyncio.wait_for(call_next(request), timeout=self.seconds)
         except TimeoutError:
             return _json_error(504, "timeout", "request timed out")
+        finally:
+            self._inflight -= 1
 
 
 def _json_error(status: int, code: str, message: str) -> Response:
