@@ -217,12 +217,17 @@ class SessionService:
                     f"{needle}%"
                 )
             )
-        stmt = select(orm.DiagnosticSession).where(*filters)
+        stmt = select(orm.DiagnosticSession).options(selectinload(orm.DiagnosticSession.declaration))
+        stmt = stmt.where(*filters)
         count = select(func.count()).select_from(orm.DiagnosticSession).where(*filters)
         rows = db.execute(
             stmt.order_by(orm.DiagnosticSession.created_at.desc()).limit(limit).offset(offset)
         ).scalars()
-        items = [self._summary(self._load(db, r.id)) for r in rows]
+        # _summary only reads row.declaration, so a single batched selectinload
+        # above covers the page; avoid re-querying each row individually (the
+        # previous self._load(db, r.id) per row turned a page of N into 1+4N
+        # queries by also eager-loading tests/snapshots that _summary never uses).
+        items = [self._summary(r) for r in rows]
         return schemas.Page(
             items=items, total=db.execute(count).scalar_one(), limit=limit, offset=offset
         )
