@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Expensive operations (training / evaluation) per client per minute.
     expensive_rate_limit_per_minute: int = 6
     worker_poll_seconds: float = 2.0
+    # Peer addresses allowed to set X-Forwarded-For for rate-limit keying (e.g. a
+    # reverse proxy's own IP). Empty by default: the raw TCP peer is trusted instead.
+    trusted_proxies: list[str] = []
 
     @property
     def runs_dir(self) -> Path:

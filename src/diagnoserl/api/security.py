@@ -64,11 +64,29 @@ class SlidingWindowLimiter:
         hits.append(now)
 
 
+def _client_key(request: Request) -> str:
+    """Resolve the identity used to key rate limits.
+
+    Behind a reverse proxy every request shares the proxy's TCP peer address,
+    so ``request.client.host`` alone would collapse all clients into one
+    bucket. If the deployment sets ``trusted_proxies`` (its own IP, or the
+    upstream LB's), trust the left-most ``X-Forwarded-For`` entry; otherwise
+    fall back to the raw peer address, since trusting the header from an
+    untrusted peer would let a client spoof its way around the limit.
+    """
+    settings: Settings = request.app.state.settings
+    peer = request.client.host if request.client else "unknown"
+    if peer in settings.trusted_proxies:
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            return forwarded.split(",")[0].strip() or peer
+    return peer
+
+
 def rate_limit_expensive(request: Request) -> None:
     """Dependency for training / evaluation endpoints."""
     limiter: SlidingWindowLimiter = request.app.state.limiter
-    client = request.client.host if request.client else "unknown"
-    limiter.check(client)
+    limiter.check(_client_key(request))
 
 
 class BodySizeLimitMiddleware(BaseHTTPMiddleware):
