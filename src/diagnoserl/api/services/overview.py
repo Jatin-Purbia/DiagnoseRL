@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from diagnoserl.api import orm
@@ -28,18 +28,22 @@ def overview(db: Session) -> dict[str, Any]:
         select(func.avg(S.steps), func.avg(S.elapsed), func.avg(S.cost)).where(S.status != "active")
     ).one()
 
+    # Outer join FaultDeclaration (1:1 per session, so this can't multiply rows) to
+    # fold the per-policy "how many were correct" count into the same grouped query
+    # instead of issuing one extra round-trip per policy.
     by_policy = []
-    for policy, n, avg_reward, avg_cost in db.execute(
-        select(S.policy, func.count(), func.avg(S.total_reward), func.avg(S.cost))
+    for policy, n, avg_reward, avg_cost, n_correct in db.execute(
+        select(
+            S.policy,
+            func.count(S.id),
+            func.avg(S.total_reward),
+            func.avg(S.cost),
+            func.sum(case((orm.FaultDeclaration.correct.is_(True), 1), else_=0)),
+        )
+        .outerjoin(orm.FaultDeclaration, orm.FaultDeclaration.session_id == S.id)
         .where(S.status != "active")
         .group_by(S.policy)
     ):
-        n_correct = db.execute(
-            select(func.count())
-            .select_from(orm.FaultDeclaration)
-            .join(S, S.id == orm.FaultDeclaration.session_id)
-            .where(S.policy == policy, orm.FaultDeclaration.correct.is_(True))
-        ).scalar_one()
         by_policy.append(
             {
                 "policy": policy,
