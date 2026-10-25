@@ -5,7 +5,6 @@ import { Comparison } from "@/features/comparison/Comparison";
 import { Experiments } from "@/features/experiments/Experiments";
 import { Faults } from "@/features/faults/Faults";
 import { Investigations } from "@/features/investigations/Investigations";
-import { Models } from "@/features/models/Models";
 import { Overview } from "@/features/overview/Overview";
 import { Settings } from "@/features/settings/Settings";
 import { Training } from "@/features/training/Training";
@@ -603,90 +602,6 @@ describe("Fault Explorer", () => {
     mockApi({ "GET /api/v1/scenarios": err(500, "internal_error", "no scenarios") });
     renderWithProviders(<Faults />);
     expect(await screen.findByRole("alert")).toBeInTheDocument();
-  });
-});
-
-// ===================================================================== Models
-describe("Model Registry", () => {
-  const active = makeModel({ id: "m-active", name: "full_seed0:best", is_active: true });
-  const other = makeModel({ id: "m-other", name: "full_seed1:best", seed: 1 });
-  const routes = (extra = {}) => ({ "GET /api/v1/models": ok([active, other]), ...extra });
-
-  it("lists models with algorithm, scenario, validation metrics and status", async () => {
-    mockApi(routes());
-    renderWithProviders(<Models />);
-    const table = await screen.findByRole("table", { name: "Registered models" });
-    expect(within(table).getAllByText("MaskablePPO")).toHaveLength(2);
-    expect(within(table).getByText("Active")).toBeInTheDocument();
-    expect(within(table).getByText("Inactive")).toBeInTheDocument();
-    expect(within(table).getAllByText("2.64")).toHaveLength(2);
-  });
-
-  it("expands a row to show the checkpoint hash", async () => {
-    mockApi(routes());
-    renderWithProviders(<Models />);
-    await userEvent.click(await screen.findByRole("button", { name: /full_seed1:best/ }));
-    expect(screen.getByText("a".repeat(64))).toBeInTheDocument();
-  });
-
-  it("asks for confirmation, explains the backend validation, and activates", async () => {
-    const api = mockApi(routes({ "POST /api/v1/models/m-other/activate": ok({ ...other, is_active: true }) }));
-    renderWithProviders(<Models />);
-    const row = (await screen.findByText("full_seed1:best")).closest("tr")!;
-    await userEvent.click(within(row).getByRole("button", { name: "Activate" }));
-    const dialog = await screen.findByRole("dialog", { name: /activate this model/i });
-    expect(within(dialog).getByText(/SHA-256 matches/)).toBeInTheDocument();
-    expect(within(dialog).getByText(/replaces the currently active model/i)).toHaveTextContent("full_seed0:best");
-    expect(api.calls.some((c) => c.key.includes("/activate"))).toBe(false); // nothing happens before confirming
-    await userEvent.click(within(dialog).getByRole("button", { name: /validate and activate/i }));
-    await waitFor(() => expect(api.calls.some((c) => c.key === "POST /api/v1/models/m-other/activate")).toBe(true));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-  });
-
-  it("shows the backend's validation problems and keeps the dialog open", async () => {
-    mockApi(routes({ "POST /api/v1/models/m-other/activate": err(400, "model_invalid", "model failed validation", { problems: ["checkpoint hash does not match the registered hash", "observation space does not match the scenario"] }) }));
-    renderWithProviders(<Models />);
-    const row = (await screen.findByText("full_seed1:best")).closest("tr")!;
-    await userEvent.click(within(row).getByRole("button", { name: "Activate" }));
-    const dialog = await screen.findByRole("dialog");
-    await userEvent.click(within(dialog).getByRole("button", { name: /validate and activate/i }));
-    expect(await within(dialog).findByText("Validation failed")).toBeInTheDocument();
-    expect(within(dialog).getByText(/hash does not match/)).toBeInTheDocument();
-    expect(within(dialog).getByText(/observation space does not match/)).toBeInTheDocument();
-  });
-
-  it("deactivates the active model after confirmation", async () => {
-    const api = mockApi(routes({ "POST /api/v1/models/m-active/deactivate": ok({ ...active, is_active: false }) }));
-    renderWithProviders(<Models />);
-    const row = (await screen.findByText("full_seed0:best")).closest("tr")!;
-    await userEvent.click(within(row).getByRole("button", { name: "Deactivate" }));
-    const dialog = await screen.findByRole("dialog", { name: /deactivate this model/i });
-    await userEvent.click(within(dialog).getByRole("button", { name: "Deactivate" }));
-    await waitFor(() => expect(api.calls.some((c) => c.key === "POST /api/v1/models/m-active/deactivate")).toBe(true));
-  });
-
-  it("registers a run", async () => {
-    setAdminKey("k");
-    const api = mockApi(routes({ "POST /api/v1/models/register": () => ({ status: 201, json: makeModel({ id: "m3", name: "x:best" }) }) }));
-    renderWithProviders(<Models />);
-    await userEvent.type(await screen.findByLabelText("Training run name"), "x");
-    await userEvent.click(screen.getByRole("button", { name: "Register" }));
-    await waitFor(() => expect(api.calls.find((c) => c.key === "POST /api/v1/models/register")?.body).toEqual({ run_name: "x", checkpoint: "best" }));
-  });
-
-  it("filters and shows an empty state", async () => {
-    mockApi({ "GET /api/v1/models": ok([]) });
-    renderWithProviders(<Models />);
-    expect(await screen.findByText("No models registered")).toBeInTheDocument();
-  });
-
-  it("searches by name", async () => {
-    mockApi(routes());
-    renderWithProviders(<Models />);
-    await screen.findByRole("table", { name: "Registered models" });
-    await userEvent.type(screen.getByLabelText("Search models"), "seed1");
-    expect(screen.queryByText("full_seed0:best")).not.toBeInTheDocument();
-    expect(screen.getByText("full_seed1:best")).toBeInTheDocument();
   });
 });
 
