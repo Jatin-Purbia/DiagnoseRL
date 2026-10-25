@@ -217,7 +217,9 @@ class SessionService:
                     f"{needle}%"
                 )
             )
-        stmt = select(orm.DiagnosticSession).options(selectinload(orm.DiagnosticSession.declaration))
+        stmt = select(orm.DiagnosticSession).options(
+            selectinload(orm.DiagnosticSession.declaration)
+        )
         stmt = stmt.where(*filters)
         count = select(func.count()).select_from(orm.DiagnosticSession).where(*filters)
         rows = db.execute(
