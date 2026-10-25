@@ -39,9 +39,17 @@ PPO_NOTE = (
 
 
 class ScenarioRegistry:
-    """Bundled scenarios, compiled once."""
+    """Bundled scenarios, compiled once.
+
+    Requests run concurrently on FastAPI's thread pool, so reads/writes of
+    the lazy caches below need a lock: without one, two requests racing on a
+    cold cache both compile the same scenario, and a config compiled under
+    one lock-free write could be observed half-initialized by another thread.
+    """
 
     def __init__(self) -> None:
+        # RLock: model() calls config() while already holding the lock.
+        self._lock = threading.RLock()
         self._configs: dict[str, ScenarioConfig] = {}
         self._models: dict[str, DiagnosticModel] = {}
 
@@ -49,16 +57,18 @@ class ScenarioRegistry:
         return list_bundled_scenarios()
 
     def config(self, name: str) -> ScenarioConfig:
-        if name not in self._configs:
-            if name not in self.names():
-                raise not_found("scenario", name)
-            self._configs[name] = load_bundled_scenario(name)
-        return self._configs[name]
+        with self._lock:
+            if name not in self._configs:
+                if name not in self.names():
+                    raise not_found("scenario", name)
+                self._configs[name] = load_bundled_scenario(name)
+            return self._configs[name]
 
     def model(self, name: str) -> DiagnosticModel:
-        if name not in self._models:
-            self._models[name] = self.config(name).compile()
-        return self._models[name]
+        with self._lock:
+            if name not in self._models:
+                self._models[name] = self.config(name).compile()
+            return self._models[name]
 
 
 def sha256_file(path: Path) -> str:
