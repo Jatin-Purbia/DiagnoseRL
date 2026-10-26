@@ -57,9 +57,7 @@ def test_register_model_records_validation_metrics_and_hash(app_client, admin):
     assert m["is_active"] is False
     assert "mean_reward" in m["metrics"]["validation"]
     assert app_client.get(f"{API}/models").json()[0]["id"] == m["id"]
-    assert (
-        app_client.get(f"{API}/models/{m['id']}/metrics").json()["metrics"]["checkpoint"] == "best"
-    )
+    assert m["metrics"]["checkpoint"] == "best"
     # registering again is idempotent
     again = _register(app_client, admin)
     assert again["id"] == m["id"]

@@ -198,14 +198,3 @@ class ScenarioSummary(BaseModel):
     n_faults: int
     n_tests: int
     max_steps: int
-
-
-class ScenarioValidateRequest(BaseModel):
-    text: str = Field(max_length=200_000)
-    format: str = Field(default="yaml", pattern=r"^(yaml|json)$")
-
-
-class ScenarioValidateResponse(BaseModel):
-    valid: bool
-    errors: list[str] = Field(default_factory=list)
-    summary: ScenarioSummary | None = None

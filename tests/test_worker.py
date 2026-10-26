@@ -49,10 +49,6 @@ def test_worker_runs_training_registers_model_then_evaluates(tmp_path):
         assert {"timesteps", "ep_rew_mean"} <= set(done["training_curve"][-1])
         assert done["elapsed_seconds"] is not None
         assert done["elapsed_seconds"] > 0
-        logs = c.get(f"{API}/experiments/{exp['id']}/logs", params={"tail": 50}).json()
-        assert logs["available"] is True
-        assert any("training started" in line for line in logs["lines"])
-        assert c.get(f"{API}/experiments/{exp['id']}/logs", params={"tail": 0}).status_code == 422
         assert c.get(f"{API}/experiments/{exp['id']}/artifacts/train.log").status_code == 200
         assert c.get(f"{API}/experiments/{exp['id']}/artifacts/summary.json").status_code == 200
 

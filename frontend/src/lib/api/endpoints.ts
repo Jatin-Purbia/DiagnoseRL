@@ -77,8 +77,6 @@ export const api = {
     request(`${V1}/experiments?limit=100`, { schema: s.page(s.experiment), signal }),
   experiment: (id: string, signal?: AbortSignal) =>
     request(`${V1}/experiments/${enc(id)}`, { schema: s.experimentDetail, signal }),
-  experimentLogs: (id: string, tail = 200, signal?: AbortSignal) =>
-    request(`${V1}/experiments/${enc(id)}/logs${qs({ tail })}`, { schema: s.experimentLogs, signal }),
   startTraining: (body: TrainingRequest) =>
     request(`${V1}/experiments/training`, { method: "POST", body, admin: true, schema: s.experiment }),
   cancelExperiment: (id: string) =>

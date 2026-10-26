@@ -13,8 +13,6 @@ import { EmptyState, ErrorState } from "@/components/ui/states";
 import { relativeTime } from "@/lib/format";
 import { useExperiments, useScenarios } from "@/lib/queries";
 import { cn } from "@/lib/utils";
-import { CompareRunsDialog } from "./CompareRunsDialog";
-import { LogsDialog } from "./LogsDialog";
 import { TrainingForm } from "./TrainingForm";
 import { TrainingMonitor } from "./TrainingMonitor";
 
@@ -27,8 +25,6 @@ export function Training() {
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [dialog, setDialog] = useState<"logs" | "compare" | null>(null);
 
   const items = useMemo(() => experiments.data?.items ?? [], [experiments.data]);
   const runId = params.get("run") ?? items[0]?.id ?? null;
@@ -43,16 +39,6 @@ export function Training() {
       ),
     [items, status, search],
   );
-  const current = items.find((e) => e.id === runId);
-  const compareRuns = items.filter((e) => selected.has(e.id));
-
-  const toggle = (id: string) =>
-    setSelected((s) => {
-      const next = new Set(s);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <>
@@ -65,17 +51,7 @@ export function Training() {
           <TrainingForm scenarios={scenarios.data} onStarted={open} />
 
           <Card>
-            <CardHeader
-              title="Experiments"
-              description={selected.size > 1 ? `${selected.size} selected for comparison` : "Tick two or more runs to compare them"}
-              action={
-                selected.size > 1 ? (
-                  <button type="button" onClick={() => setDialog("compare")} className="text-xs font-medium text-primary hover:underline">
-                    Compare {selected.size}
-                  </button>
-                ) : undefined
-              }
-            />
+            <CardHeader title="Experiments" />
             <CardContent className="space-y-3">
               <div className="flex gap-2">
                 <label className="relative flex-1">
@@ -107,13 +83,6 @@ export function Training() {
                 <ul className="space-y-1.5">
                   {visible.map((e) => (
                     <li key={e.id} className="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        aria-label={`Select ${e.run_name} for comparison`}
-                        checked={selected.has(e.id)}
-                        onChange={() => toggle(e.id)}
-                        className="mt-3.5 size-4 shrink-0 accent-[var(--primary)]"
-                      />
                       <button
                         type="button"
                         onClick={() => open(e.id)}
@@ -142,7 +111,7 @@ export function Training() {
 
         <div className="min-w-0">
           {runId ? (
-            <TrainingMonitor id={runId} onLogs={() => setDialog("logs")} onCompare={() => setDialog("compare")} />
+            <TrainingMonitor id={runId} />
           ) : (
             <EmptyState title="Select or start a run to see its learning curves">
               Reward, accuracy, losses and entropy appear here as soon as the worker reports them.
@@ -151,19 +120,6 @@ export function Training() {
         </div>
       </div>
 
-      {runId && (
-        <LogsDialog
-          expId={runId}
-          open={dialog === "logs"}
-          onOpenChange={(o) => setDialog(o ? "logs" : null)}
-          live={current?.status === "running" || current?.status === "queued"}
-        />
-      )}
-      <CompareRunsDialog
-        runs={compareRuns.length >= 2 ? compareRuns : current ? [current, ...compareRuns.filter((r) => r.id !== current.id)] : compareRuns}
-        open={dialog === "compare"}
-        onOpenChange={(o) => setDialog(o ? "compare" : null)}
-      />
     </>
   );
 }

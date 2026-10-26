@@ -29,7 +29,6 @@ ARTIFACT_FILES = (
     "train.log",
 )
 MAX_CURVE_POINTS = 500
-MAX_LOG_LINES = 1000
 FIGURE_RE = re.compile(r"^[A-Za-z0-9_\-]+\.png$")
 
 
@@ -156,13 +155,6 @@ class ExperimentService:
         elif end.tzinfo is None and start.tzinfo is not None:
             end = end.replace(tzinfo=start.tzinfo)
         return max(0.0, (end - start).total_seconds())
-
-    def log_tail(self, exp: orm.TrainingExperiment, tail: int) -> list[str]:
-        path = self.settings.runs_dir / exp.run_name / "train.log"
-        if not path.is_file():
-            return []
-        lines = path.read_text(encoding="utf-8").splitlines()
-        return lines[-min(tail, MAX_LOG_LINES) :]
 
     def out(self, exp: orm.TrainingExperiment) -> schemas.ExperimentOut:
         curve = self.curve(exp) if exp.status in ("running", "succeeded", "failed") else []

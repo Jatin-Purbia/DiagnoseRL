@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, GitCompare, Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { LineSeriesChart } from "@/components/charts/LineSeriesChart";
@@ -16,7 +16,6 @@ import { Table, Td, Th, Tr } from "@/components/ui/table";
 import { api, type Experiment } from "@/lib/api";
 import { compact, dateTime, label, num, pct } from "@/lib/format";
 import { useExperiment, useExperiments, useModels } from "@/lib/queries";
-import { CompareRunsDialog } from "@/features/training/CompareRunsDialog";
 
 const ALGORITHM = "MaskablePPO";
 
@@ -109,9 +108,7 @@ export function Experiments() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   const [scenario, setScenario] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<Experiment | null>(null);
-  const [compare, setCompare] = useState(false);
 
   const items = useMemo(() => experiments.data?.items ?? [], [experiments.data]);
   const scenarios = useMemo(() => [...new Set(items.map((e) => String(e.config.scenario ?? "")).filter(Boolean))], [items]);
@@ -122,25 +119,12 @@ export function Experiments() {
       (!scenario || e.config.scenario === scenario) &&
       (!query || `${e.run_name} ${e.name}`.toLowerCase().includes(query.toLowerCase())),
   );
-  const chosen = items.filter((e) => selected.has(e.id));
-  const toggle = (id: string) =>
-    setSelected((s) => {
-      const n = new Set(s);
-      if (n.has(id)) n.delete(id);
-      else n.add(id);
-      return n;
-    });
 
   return (
     <>
       <PageHeader
         title="Experiment History"
-        description="Every training run with its configuration, status and resulting checkpoint. Select runs to compare them."
-        actions={
-          <Button variant="outline" size="sm" disabled={chosen.length < 2} onClick={() => setCompare(true)}>
-            <GitCompare /> Compare {chosen.length > 1 ? chosen.length : ""} selected
-          </Button>
-        }
+        description="Every training run with its configuration, status and resulting checkpoint."
       />
 
       <Card className="mb-4 p-4">
@@ -185,9 +169,6 @@ export function Experiments() {
           <Table aria-label="Experiments" className="min-w-[60rem]">
             <thead>
               <tr>
-                <Th>
-                  <span className="sr-only">Select</span>
-                </Th>
                 <Th>Experiment</Th>
                 <Th>Algorithm</Th>
                 <Th>Scenario</Th>
@@ -205,15 +186,6 @@ export function Experiments() {
                 const v = m?.metrics.validation;
                 return (
                   <Tr key={e.id}>
-                    <Td>
-                      <input
-                        type="checkbox"
-                        aria-label={`Select ${e.run_name}`}
-                        checked={selected.has(e.id)}
-                        onChange={() => toggle(e.id)}
-                        className="size-4 accent-[var(--primary)]"
-                      />
-                    </Td>
                     <Td>
                       <button type="button" onClick={() => setOpen(e)} className="text-left">
                         <span className="block font-medium hover:text-primary">{e.run_name}</span>
@@ -241,7 +213,6 @@ export function Experiments() {
       )}
 
       <ExperimentDetailDialog exp={open} onClose={() => setOpen(null)} modelName={open ? modelFor(open.id)?.name : undefined} />
-      <CompareRunsDialog runs={chosen} open={compare} onOpenChange={setCompare} />
     </>
   );
 }

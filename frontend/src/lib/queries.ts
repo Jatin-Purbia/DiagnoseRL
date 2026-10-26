@@ -20,7 +20,6 @@ export const keys = {
   report: (id: string) => ["session", id, "report"] as const,
   experiments: ["experiments"] as const,
   experiment: (id: string) => ["experiment", id] as const,
-  experimentLogs: (id: string) => ["experiment", id, "logs"] as const,
   models: ["models"] as const,
   evaluations: ["evaluations"] as const,
   evaluationResults: (id: string) => ["evaluation", id, "results"] as const,

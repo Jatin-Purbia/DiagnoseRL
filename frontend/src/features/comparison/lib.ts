@@ -68,22 +68,6 @@ export function policyRows(r: EvaluationResults, labelOf: (k: string) => string)
   return rows;
 }
 
-interface XY {
-  x: number;
-  y: number;
-}
-
-/**
- * Non-dominated points: no other point has both lower-or-equal cost and higher-or-equal accuracy
- * (with at least one strict). Returned sorted by cost, ready to draw as a frontier line.
- */
-export function paretoFront<T extends XY>(points: T[]): T[] {
-  const front = points.filter(
-    (p) => !points.some((q) => q !== p && q.x <= p.x && q.y >= p.y && (q.x < p.x || q.y > p.y)),
-  );
-  return front.sort((a, b) => a.x - b.x);
-}
-
 interface Equivalence {
   equivalent: boolean;
   differences: string[];

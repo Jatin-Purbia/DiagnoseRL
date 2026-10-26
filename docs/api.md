@@ -35,12 +35,10 @@ Errors always have the same shape:
 | POST | `/sessions` | `{scenario, policy, seed?}` → new session (public view) |
 | GET | `/sessions?limit&offset&status` | paginated list |
 | GET | `/sessions/{id}` | session state, posterior, executed tests, available tests |
-| GET | `/sessions/{id}/posterior` | current posterior, entropy, confidence |
 | GET | `/sessions/{id}/tests` | test catalogue with `executed` / `available` flags |
 | POST | `/sessions/{id}/tests` | `{test_id, expected_step?}` run a simulated test |
 | GET | `/sessions/{id}/recommendation` | policy's next action + explanation |
 | POST | `/sessions/{id}/declare` | `{fault_id}` ends the investigation |
-| GET | `/sessions/{id}/history` | tests with posterior before/after, posterior snapshots |
 | GET | `/sessions/{id}/report` | final report (409 while the session is active) |
 | GET | `/policies` | available policies; scenarios with an active RL model |
 | GET | `/overview` | dashboard aggregates |
@@ -65,13 +63,12 @@ explanation.
 |---|---|---|
 | GET | `/scenarios` | summaries |
 | GET | `/scenarios/{name}` | faults, priors, tests, outcome distributions `P(result \| fault, test)` |
-| POST | `/scenarios/validate` | `{text, format}` validate YAML/JSON without storing it |
 
 ## Models (registry)
 
 | method | path | |
 |---|---|---|
-| GET | `/models`, `/models/{id}`, `/models/{id}/metrics` | read |
+| GET | `/models`, `/models/{id}` | read |
 | POST | `/models/register` | admin: `{run_name, checkpoint}` register a finished training run |
 | POST | `/models/{id}/activate` | admin: validate and activate (audit-logged); one active model per scenario |
 | POST | `/models/{id}/deactivate` | admin |

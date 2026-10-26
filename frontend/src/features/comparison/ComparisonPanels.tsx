@@ -28,7 +28,7 @@ import { Table, Td, Th, Tr } from "@/components/ui/table";
 import type { EvaluationResults } from "@/lib/api";
 import { label, num, pct, signed } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { normaliseRows, paretoFront, policyRows, summaryChoices, topConfusions } from "./lib";
+import { normaliseRows, policyRows, summaryChoices, topConfusions } from "./lib";
 
 // ---------------------------------------------------------------- performance table
 type SortKey = "label" | "accuracy" | "mean_tests" | "mean_duration" | "mean_cost" | "mean_reward" | "no_diagnosis_rate";
@@ -128,7 +128,6 @@ export function AccuracyCostChart({ results }: { results: EvaluationResults }) {
   }, [results, xKey]);
 
   const headline = rows.map((r) => ({ x: r[xKey], y: r.accuracy, key: r.key, name: r.label }));
-  const front = paretoFront(headline.filter((p) => p.key !== "exact"));
   const seedPoints = Object.entries(results.rl?.per_seed ?? {}).map(([seed, s]) => ({
     x: Number(s[xKey] ?? Number.NaN),
     y: Number(s.accuracy),
@@ -176,9 +175,6 @@ export function AccuracyCostChart({ results }: { results: EvaluationResults }) {
                 isAnimationActive={false}
               />
             ))}
-            {front.length > 1 && (
-              <Scatter name="Pareto frontier" data={front} fill="transparent" line={{ stroke: C.ink, strokeDasharray: "5 4", strokeWidth: 1.5 }} shape={() => <g />} legendType="plainline" isAnimationActive={false} />
-            )}
             {seedPoints.length > 0 && <Scatter name="PPO (each seed)" data={seedPoints} fill={C.primary} fillOpacity={0.45} isAnimationActive={false} />}
             <Scatter
               name="Headline policies"
@@ -200,11 +196,6 @@ export function AccuracyCostChart({ results }: { results: EvaluationResults }) {
           {seedPoints.length > 0 && (
             <li className="inline-flex items-center gap-1.5">
               <span aria-hidden className="size-2.5 rounded-full bg-primary/50" /> each PPO seed
-            </li>
-          )}
-          {front.length > 1 && (
-            <li className="inline-flex items-center gap-1.5">
-              <span aria-hidden className="w-4 border-t-2 border-dashed border-ink" /> Pareto frontier
             </li>
           )}
         </ul>

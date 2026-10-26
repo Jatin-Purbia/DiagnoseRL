@@ -336,31 +336,6 @@ describe("Training", () => {
     expect(await screen.findByText(/needs the admin API key/i)).toBeInTheDocument();
   });
 
-  it("shows the log tail from the backend", async () => {
-    mockApi(routes({
-      "GET /api/v1/experiments/run-2/logs": ok({ available: true, lines: [JSON.stringify({ ts: "2026-10-22T08:00:00Z", level: "INFO", msg: "validation", timesteps: 4096, val_reward: 1.5 })] }),
-    }));
-    renderWithProviders(<Training />, { search: "run=run-2" });
-    await userEvent.click(await screen.findByRole("button", { name: /view logs/i }));
-    const log = await screen.findByLabelText("Training log lines");
-    expect(log).toHaveTextContent("validation");
-    expect(log).toHaveTextContent("val_reward=1.5");
-  });
-
-  it("compares selected runs and warns when their scenarios differ", async () => {
-    mockApi(routes({
-      "GET /api/v1/experiments": ok(page([running, { ...done, config: { scenario: "standard" } }])),
-      "GET /api/v1/experiments/run-2": ok(makeExperimentDetail({ ...done, id: "run-2", config: { scenario: "standard" } })),
-    }));
-    renderWithProviders(<Training />, { search: "run=run-2" });
-    await userEvent.click(await screen.findByRole("checkbox", { name: /select live-run for comparison/i }));
-    await userEvent.click(screen.getByRole("checkbox", { name: /select done-run for comparison/i }));
-    await userEvent.click(screen.getByRole("button", { name: /compare 2/i }));
-    const dialog = await screen.findByRole("dialog", { name: /compare runs/i });
-    expect(await within(dialog).findByRole("img", { name: /validation reward of the selected runs/i })).toBeInTheDocument();
-    expect(within(dialog).getByRole("alert")).toHaveTextContent(/different scenarios/i);
-  });
-
   it("filters the experiment list", async () => {
     mockApi(routes());
     renderWithProviders(<Training />);
@@ -650,20 +625,6 @@ describe("Experiment History", () => {
     const dl = await within(dialog).findByRole("link", { name: /train_metrics\.jsonl/ });
     expect(dl).toHaveAttribute("href", expect.stringContaining("/api/v1/experiments/a/artifacts/train_metrics.jsonl"));
     expect(within(dialog).getByRole("link", { name: /open in rl training/i })).toHaveAttribute("href", "/training?run=a");
-  });
-
-  it("enables comparison only with two or more selected runs", async () => {
-    mockApi(routes());
-    renderWithProviders(<Experiments />);
-    await screen.findByRole("table", { name: "Experiments" });
-    const compare = screen.getByRole("button", { name: /compare/i });
-    expect(compare).toBeDisabled();
-    await userEvent.click(screen.getByRole("checkbox", { name: "Select alpha-run" }));
-    expect(compare).toBeDisabled();
-    await userEvent.click(screen.getByRole("checkbox", { name: "Select beta-run" }));
-    expect(compare).toBeEnabled();
-    await userEvent.click(compare);
-    expect(await screen.findByRole("dialog", { name: /compare runs/i })).toBeInTheDocument();
   });
 
   it("explains an empty history", async () => {

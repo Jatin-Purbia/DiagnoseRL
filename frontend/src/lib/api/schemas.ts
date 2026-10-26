@@ -278,8 +278,6 @@ export const experimentDetail = experiment.extend({
   artifacts: z.array(z.string()),
 });
 
-export const experimentLogs = z.object({ lines: z.array(z.string()), available: z.boolean() });
-
 export const evaluation = z.object({
   id: z.string(),
   status: z.enum(["queued", "running", "succeeded", "failed"]),

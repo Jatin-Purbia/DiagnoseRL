@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Ban, Download, FileText, GitCompare, OctagonX, Package, WifiOff } from "lucide-react";
+import { Ban, Download, OctagonX, Package, WifiOff } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -51,15 +51,7 @@ function ChartCard({
   );
 }
 
-export function TrainingMonitor({
-  id,
-  onCompare,
-  onLogs,
-}: {
-  id: string;
-  onCompare: () => void;
-  onLogs: () => void;
-}) {
+export function TrainingMonitor({ id }: { id: string }) {
   const qc = useQueryClient();
   const q = useExperiment(id);
   const models = useModels();
@@ -145,12 +137,6 @@ export function TrainingMonitor({
                 </Button>
               </span>
             </Tip>
-            <Button variant="outline" size="sm" onClick={onLogs}>
-              <FileText /> View logs
-            </Button>
-            <Button variant="outline" size="sm" onClick={onCompare}>
-              <GitCompare /> Compare runs
-            </Button>
           </div>
         </CardContent>
       </Card>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { compact, modelledSeconds, pct, relativeTime, signed, wallClock } from "@/lib/format";
 import { ApiError, getAdminKey, request, setAdminKey } from "@/lib/api/client";
 import { session as sessionSchema } from "@/lib/api/schemas";
-import { equivalence, normaliseRows, paretoFront, policyRows, topConfusions } from "@/features/comparison/lib";
+import { equivalence, normaliseRows, policyRows, topConfusions } from "@/features/comparison/lib";
 import { faultDifficulties, faultSignals } from "@/features/faults/lib";
 import { trendOf } from "@/features/overview/trend";
 import { beliefSteps, currentStage, entropyBits, parseExplanation, testImpact } from "@/features/playground/derive";
@@ -229,21 +229,6 @@ describe("validateTraining", () => {
 
 // ------------------------------------------------------------------- comparison
 describe("comparison lib", () => {
-  it("finds the Pareto frontier (lower cost and higher accuracy dominate)", () => {
-    const pts = [
-      { x: 1, y: 0.5, n: "a" },
-      { x: 2, y: 0.8, n: "b" },
-      { x: 3, y: 0.7, n: "dominated by b" },
-      { x: 4, y: 0.9, n: "d" },
-      { x: 4, y: 0.6, n: "dominated" },
-    ];
-    expect(paretoFront(pts).map((p) => p.n)).toEqual(["a", "b", "d"]);
-  });
-
-  it("keeps duplicates that are not strictly dominated", () => {
-    expect(paretoFront([{ x: 1, y: 0.5 }, { x: 1, y: 0.5 }]).length).toBe(2);
-  });
-
   it("builds rows for baselines, PPO and the exact optimum", () => {
     const r = makeResults();
     const rows = policyRows(r, (k) => k);

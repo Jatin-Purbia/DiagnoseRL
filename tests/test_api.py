@@ -54,28 +54,6 @@ def test_scenarios_list_and_detail(client):
     assert client.get(f"{API}/scenarios/nope").status_code == 404
 
 
-def test_scenario_validation_endpoint(client):
-    from conftest import make_scenario
-
-    ok = client.post(
-        f"{API}/scenarios/validate", json={"text": json.dumps(make_scenario()), "format": "json"}
-    )
-    assert ok.json()["valid"] is True
-    assert ok.json()["summary"]["n_tests"] == 2
-
-    bad = make_scenario()
-    bad["faults"][0]["prior"] = 0.9
-    resp = client.post(
-        f"{API}/scenarios/validate", json={"text": json.dumps(bad), "format": "json"}
-    )
-    assert resp.status_code == 200
-    assert resp.json()["valid"] is False
-    assert resp.json()["errors"]
-
-    junk = client.post(f"{API}/scenarios/validate", json={"text": "{nope", "format": "yaml"})
-    assert junk.json()["valid"] is False
-
-
 # --------------------------------------------------------------------- sessions
 def test_full_diagnostic_flow(client):
     model = load_model("small")
@@ -112,9 +90,6 @@ def test_full_diagnostic_flow(client):
     assert "true_fault" not in json.dumps(body)
     assert client.get(f"{API}/sessions/{sid}/report").status_code == 409  # still active
 
-    post = client.get(f"{API}/sessions/{sid}/posterior").json()
-    assert post["steps"] == 1
-
     fault = max(body["session"]["posterior"], key=lambda p: p["probability"])["id"]
     d = client.post(f"{API}/sessions/{sid}/declare", json={"fault_id": fault})
     assert d.status_code == 200, d.text
@@ -128,10 +103,6 @@ def test_full_diagnostic_flow(client):
     assert report["declared_fault"] == fault
     assert report["timeout"] is False
     assert len(report["posterior_trace"]) == 2  # prior + one test
-    history = client.get(f"{API}/sessions/{sid}/history").json()
-    assert [t["test_id"] for t in history["tests"]] == [test_id]
-    assert history["snapshots"][0]["step"] == 0
-    assert history["tests"][0]["recommendation"] is not None
 
 
 def test_session_listing_and_pagination(client):
@@ -375,7 +346,7 @@ def test_expensive_operations_are_rate_limited(tmp_path, admin):
 
 def test_request_body_size_limit(tmp_path):
     with TestClient(build_app(tmp_path, max_body_bytes=500)) as c:
-        r = c.post(f"{API}/scenarios/validate", json={"text": "x" * 2000})
+        r = c.post(f"{API}/sessions", json={"scenario": "x" * 2000})
         assert r.status_code == 413
         assert r.json()["error"]["code"] == "payload_too_large"
 

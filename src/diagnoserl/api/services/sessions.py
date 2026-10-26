@@ -277,15 +277,6 @@ class SessionService:
             )
         return out
 
-    def posterior(self, db: Session, session_id: uuid.UUID) -> dict[str, Any]:
-        view = self.get(db, session_id)
-        return {
-            "posterior": view.posterior,
-            "entropy_bits": view.entropy_bits,
-            "confidence": view.confidence,
-            "steps": view.steps,
-        }
-
     def _recommend(self, db: Session, row: orm.DiagnosticSession) -> dict[str, Any]:
         model = self._model(row)
         env, obs, _ = self._replay(db, row)
@@ -434,20 +425,6 @@ class SessionService:
             true_fault=row.true_fault,
             session=self._view(row),
         )
-
-    def history(self, db: Session, session_id: uuid.UUID) -> dict[str, Any]:
-        row = self._load(db, session_id)
-        model = self._model(row)
-        return {
-            "session_id": str(row.id),
-            "status": row.status,
-            "fault_ids": list(model.fault_ids),
-            "tests": [self._executed_out(model, t).model_dump() for t in row.tests],
-            "snapshots": [
-                {"step": s.step, "posterior": s.posterior, "entropy_bits": s.entropy}
-                for s in row.snapshots
-            ],
-        }
 
     def report(self, db: Session, session_id: uuid.UUID) -> schemas.ReportOut:
         row = self._load(db, session_id)

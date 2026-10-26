@@ -66,15 +66,6 @@ def get_session(
     return svc.get(db, session_id)
 
 
-@router.get("/sessions/{session_id}/posterior")
-def get_posterior(
-    session_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    svc: SessionService = Depends(get_sessions),
-) -> dict[str, Any]:
-    return svc.posterior(db, session_id)
-
-
 @router.get("/sessions/{session_id}/tests", response_model=list[schemas.TestOut])
 def get_tests(
     session_id: uuid.UUID,
@@ -115,15 +106,6 @@ def declare(
     out = svc.declare(db, session_id, req)
     db.commit()
     return out
-
-
-@router.get("/sessions/{session_id}/history")
-def get_history(
-    session_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    svc: SessionService = Depends(get_sessions),
-) -> dict[str, Any]:
-    return svc.history(db, session_id)
 
 
 @router.get("/sessions/{session_id}/report", response_model=schemas.ReportOut)

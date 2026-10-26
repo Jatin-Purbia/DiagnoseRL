@@ -45,16 +45,6 @@ def get_model(
     return registry.get(db, model_id)
 
 
-@router.get("/{model_id}/metrics")
-def get_model_metrics(
-    model_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    registry: ModelRegistry = Depends(get_registry),
-) -> dict[str, Any]:
-    version = registry.get(db, model_id)
-    return {"id": str(version.id), "name": version.name, "metrics": version.metrics}
-
-
 @router.post("/{model_id}/activate", response_model=schemas.ModelVersionOut)
 def activate_model(
     model_id: uuid.UUID,

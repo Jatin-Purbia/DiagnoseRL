@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends
 from diagnoserl.api import schemas
 from diagnoserl.api.deps import get_scenarios
 from diagnoserl.api.services.engine import ScenarioRegistry
-from diagnoserl.config import ScenarioConfig, ScenarioError, parse_scenario
+from diagnoserl.config import ScenarioConfig
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 
@@ -27,16 +27,6 @@ def _summary(cfg: ScenarioConfig) -> schemas.ScenarioSummary:
 @router.get("", response_model=list[schemas.ScenarioSummary])
 def list_scenarios(reg: ScenarioRegistry = Depends(get_scenarios)) -> list[schemas.ScenarioSummary]:
     return [_summary(reg.config(n)) for n in reg.names()]
-
-
-@router.post("/validate", response_model=schemas.ScenarioValidateResponse)
-def validate_scenario(req: schemas.ScenarioValidateRequest) -> schemas.ScenarioValidateResponse:
-    """Validate scenario text without storing it."""
-    try:
-        cfg = parse_scenario(req.text, fmt=req.format)
-    except ScenarioError as exc:
-        return schemas.ScenarioValidateResponse(valid=False, errors=str(exc).splitlines()[:50])
-    return schemas.ScenarioValidateResponse(valid=True, summary=_summary(cfg))
 
 
 @router.get("/{name}")
