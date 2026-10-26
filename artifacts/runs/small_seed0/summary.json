@@ -1,0 +1,25 @@
+{
+  "run_name": "small_seed0",
+  "seed": 0,
+  "scenario": "small",
+  "total_timesteps": 500736,
+  "best_val_reward": 6.955100000000001,
+  "final_val": {
+    "timesteps": 500736,
+    "n_episodes": 500,
+    "accuracy": 0.862,
+    "incorrect_rate": 0.138,
+    "no_diagnosis_rate": 0.0,
+    "mean_tests": 2.686,
+    "mean_cost": 2.738,
+    "mean_duration": 10.66,
+    "median_duration": 12.0,
+    "p90_duration": 15.0,
+    "p95_duration": 15.0,
+    "mean_reward": 6.517166666666666,
+    "std_reward": 6.987572649892055
+  },
+  "best_model_sha256": "28f7823780ae54eaaaa43c79d5ebfaf50946f295dede4d0bae0fd564c904714d",
+  "final_model_sha256": "b84306215d773f91386e6d7692fdbe7125f8d8da83e4bbceb4103628577fa125",
+  "wall_seconds": 969.5
+}

@@ -28,7 +28,12 @@ pip-wheel-metadata/
 # Experiment outputs and large generated artifacts
 checkpoints/
 models/
-artifacts/
+artifacts/*
+!artifacts/runs/
+artifacts/runs/*
+# The trained agents behind docs/results.md are kept (best + final model, config, metrics).
+!artifacts/runs/full_seed[0-2]/
+!artifacts/runs/small_seed[0-2]/
 outputs/
 logs/
 tensorboard/
