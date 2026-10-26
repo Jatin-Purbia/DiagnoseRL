@@ -196,8 +196,8 @@ of the gap to the Bayesian baselines; this was not explored.
 
 ## What would be needed before any live use
 
-1. Fault/test probabilities estimated from real incidents ([historical-data.md](historical-data.md)),
-   with selection bias addressed, rather than hand-authored.
+1. Fault/test probabilities estimated from real incidents, with selection bias addressed,
+   rather than hand-authored.
 2. Evaluation on real held-out incidents, with correlated tests modelled properly.
 3. Human-approved, read-only diagnostic adapters, audited and rate-limited.
 4. Retraining or robust design for changed costs, penalties, priors and test catalogues.

@@ -39,7 +39,6 @@ microservices yet; the boundaries below make that possible later.
 | Persistence | `diagnoserl.api.orm`, `database`, `alembic/` | tables, migrations | SQLAlchemy |
 | HTTP | `diagnoserl.api.routers`, `schemas`, `errors`, `security` | endpoints, validation, auth, limits | services |
 | Worker | `diagnoserl.api.worker` | executes queued training / evaluation jobs | services |
-| Real data | `diagnoserl.historical` | incident import, estimation, replay, advisor mode | domain, policies |
 
 Rules that keep the layers honest:
 

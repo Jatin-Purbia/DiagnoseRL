@@ -693,11 +693,10 @@ describe("Settings", () => {
     expect(await screen.findByText("The server rejected this key.")).toBeInTheDocument();
   });
 
-  it("states what the environment is, without implying advisor mode works", async () => {
+  it("states what the environment is", async () => {
     mockApi(routes());
     renderWithProviders(<Settings />);
     expect(await screen.findByText(/nothing touches a real system/i)).toBeInTheDocument();
-    expect(screen.getByText("not available")).toBeInTheDocument();
   });
 });
 

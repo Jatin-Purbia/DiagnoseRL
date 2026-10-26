@@ -188,7 +188,7 @@ export function TopNavbar() {
       </Suspense>
 
       <div className="ml-auto flex items-center gap-2">
-        <Tip content="All investigations run against the simulator. Advisor mode (real, human-approved diagnostics) is not exposed through the API yet.">
+        <Tip content="All investigations run against the simulator.">
           <Badge tone="secondary" className="hidden sm:inline-flex">
             Simulation
           </Badge>

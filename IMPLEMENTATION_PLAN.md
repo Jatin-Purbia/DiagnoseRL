@@ -32,13 +32,12 @@ Main risks identified up front, and how they were handled:
 | 6 Backend + persistence | `[~]` | 70+ API/worker/registry/concurrency tests on SQLite; migration upgrade/check/downgrade; **not run against PostgreSQL** |
 | 7 Frontend | `[~]` | 25 component/workflow tests, lint, typecheck, production build; **not viewed in a browser, no screenshots** |
 | 8 Hardening + deployment | `[~]` | Dockerfiles, compose file (validated), CI workflow, security controls tested; **Docker images never built and CI never executed** (Docker daemon was not running; no GitHub run) |
-| 9 Real incident data prep | `[x]` | schema, importer, estimator (parameter recovery test), bias diagnostics, replay, read-only adapters |
 
 ## Verification log (2026-10-22)
 
 * `ruff check .` and `ruff format --check`: clean. `mypy --strict src`: clean (58 files).
 * `pytest`: all Python tests passing (config, Bayes, env, baselines, metrics, stats, training,
-  experiment pipeline, API, models, worker, concurrency, historical, stopping).
+  experiment pipeline, API, models, worker, concurrency, stopping).
 * Frontend: `eslint`, `tsc --noEmit`, `vitest` (25 tests), `next build` all pass.
 * Real-server smoke test: uvicorn + the trained 2M-step PPO model, register → activate → session →
   recommendations → declare → report, all over HTTP (hidden fault never exposed).
