@@ -15,7 +15,7 @@ import type {
 } from "@/lib/api";
 
 export const SID = "11111111-1111-1111-1111-111111111111";
-export const FAULTS = [
+const FAULTS = [
   { id: "db_down", name: "Database unavailable" },
   { id: "cpu_high", name: "CPU saturation" },
   { id: "disk_full", name: "Disk full" },
@@ -46,7 +46,7 @@ export function makeSession(over: Partial<Session> = {}): Session {
   };
 }
 
-export function makeExecuted(over: Partial<ExecutedTest> = {}): ExecutedTest {
+function makeExecuted(over: Partial<ExecutedTest> = {}): ExecutedTest {
   return {
     step: 1,
     test_id: "db_probe",

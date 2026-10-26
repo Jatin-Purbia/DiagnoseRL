@@ -17,13 +17,13 @@ export function shouldRetry(failureCount: number, error: unknown): boolean {
   return failureCount < 2;
 }
 
-export function notifyError(error: unknown, fallback = "Request failed"): void {
+function notifyError(error: unknown, fallback = "Request failed"): void {
   if (error instanceof DOMException && error.name === "AbortError") return;
   const message = error instanceof ApiError ? error.friendly : error instanceof Error ? error.message : fallback;
   toast.error(message, { id: message });
 }
 
-export function makeQueryClient(): QueryClient {
+function makeQueryClient(): QueryClient {
   return new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {

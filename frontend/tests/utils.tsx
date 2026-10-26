@@ -52,7 +52,7 @@ export const err = (status: number, code: string, message: string, details: Reco
   json: { error: { code, message, details } },
 });
 
-export function makeClient(): QueryClient {
+function makeClient(): QueryClient {
   return new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 }, mutations: { retry: false } },
   });

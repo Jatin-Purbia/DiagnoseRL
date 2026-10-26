@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { pct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export interface FaultBar {
+interface FaultBar {
   id: string;
   name: string;
   probability: number;

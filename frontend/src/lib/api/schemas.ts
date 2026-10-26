@@ -6,9 +6,9 @@ import { z } from "zod";
 const nullableNumber = z.number().nullable();
 
 // ------------------------------------------------------------------ diagnostics
-export const faultProbability = z.object({ id: z.string(), name: z.string(), probability: z.number() });
+const faultProbability = z.object({ id: z.string(), name: z.string(), probability: z.number() });
 
-export const recommendedAction = z.object({
+const recommendedAction = z.object({
   type: z.enum(["test", "declare"]),
   id: z.string(),
   name: z.string(),
@@ -251,7 +251,7 @@ export const experiment = z.object({
   config: z.record(z.unknown()),
 });
 
-export const validationPoint = z.object({
+const validationPoint = z.object({
   timesteps: z.number(),
   mean_reward: z.number(),
   accuracy: z.number(),
@@ -259,7 +259,7 @@ export const validationPoint = z.object({
   mean_cost: z.number(),
 });
 
-export const trainingPoint = z.object({
+const trainingPoint = z.object({
   timesteps: z.number(),
   wall_seconds: z.number(),
   ep_rew_mean: z.number().optional(),
@@ -364,26 +364,18 @@ export const health = z.object({
 });
 
 // ------------------------------------------------------------------ inferred types
-export type FaultProbability = z.infer<typeof faultProbability>;
 export type Recommendation = z.infer<typeof recommendation>;
 export type ExecutedTest = z.infer<typeof executedTest>;
 export type Session = z.infer<typeof session>;
 export type TestInfo = z.infer<typeof testInfo>;
-export type ExecuteTestResponse = z.infer<typeof executeTestResponse>;
-export type DeclareResponse = z.infer<typeof declareResponse>;
 export type Report = z.infer<typeof report>;
-export type SessionSummary = z.infer<typeof sessionSummary>;
 export type Policies = z.infer<typeof policies>;
 export type ScenarioSummary = z.infer<typeof scenarioSummary>;
 export type ScenarioDetail = z.infer<typeof scenarioDetail>;
 export type Analytics = z.infer<typeof analytics>;
-export type Overview = z.infer<typeof overview>;
 export type ModelVersion = z.infer<typeof modelVersion>;
 export type Experiment = z.infer<typeof experiment>;
 export type ExperimentDetail = z.infer<typeof experimentDetail>;
-export type TrainingPoint = z.infer<typeof trainingPoint>;
-export type ValidationPoint = z.infer<typeof validationPoint>;
 export type Evaluation = z.infer<typeof evaluation>;
 export type PolicySummary = z.infer<typeof policySummary>;
 export type EvaluationResults = z.infer<typeof evaluationResults>;
-export type Health = z.infer<typeof health>;

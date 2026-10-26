@@ -1,8 +1,8 @@
 import type { EvaluationResults, PolicySummary } from "@/lib/api";
 
-export const BASELINE_ORDER = ["fixed_order", "random", "info_gain", "cost_aware_bayes"] as const;
+const BASELINE_ORDER = ["fixed_order", "random", "info_gain", "cost_aware_bayes"] as const;
 
-export interface PolicyRow {
+interface PolicyRow {
   key: string;
   label: string;
   accuracy: number;
@@ -68,7 +68,7 @@ export function policyRows(r: EvaluationResults, labelOf: (k: string) => string)
   return rows;
 }
 
-export interface XY {
+interface XY {
   x: number;
   y: number;
 }
@@ -84,7 +84,7 @@ export function paretoFront<T extends XY>(points: T[]): T[] {
   return front.sort((a, b) => a.x - b.x);
 }
 
-export interface Equivalence {
+interface Equivalence {
   equivalent: boolean;
   differences: string[];
 }
@@ -108,7 +108,7 @@ export function equivalence(a: EvaluationResults, b: EvaluationResults): Equival
   return { equivalent: diffs.length === 0, differences: diffs };
 }
 
-export interface Confusion {
+interface Confusion {
   truth: string;
   predicted: string;
   count: number;

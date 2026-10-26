@@ -3,7 +3,7 @@
 
 import type { ExecutedTest, Recommendation, Session } from "@/lib/api";
 
-export interface BeliefStep {
+interface BeliefStep {
   step: number;
   label: string;
   posterior: number[];
@@ -24,7 +24,7 @@ export function entropyBits(p: number[]): number {
   return h;
 }
 
-export interface Impact {
+interface Impact {
   /** The fault whose probability moved the most, and by how many percentage points. */
   fault: string;
   deltaPoints: number;
@@ -80,12 +80,12 @@ export function currentStage(input: {
   return session.steps === 0 && input.loadingRecommendation ? 0 : 1;
 }
 
-export interface ActionPreference {
+interface ActionPreference {
   action: string;
   probability: number;
 }
 
-export interface PolicyExplanation {
+interface PolicyExplanation {
   method: string | null;
   /** Network output; only present for the RL policy. Never a calibrated diagnosis confidence. */
   preferences: ActionPreference[];

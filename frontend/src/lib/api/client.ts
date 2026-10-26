@@ -47,7 +47,7 @@ export class ApiError extends Error {
   }
 }
 
-export interface RequestOptions<S extends z.ZodTypeAny> {
+interface RequestOptions<S extends z.ZodTypeAny> {
   method?: "GET" | "POST";
   body?: unknown;
   admin?: boolean;

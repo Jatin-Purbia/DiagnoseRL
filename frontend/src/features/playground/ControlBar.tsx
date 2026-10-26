@@ -19,7 +19,7 @@ import { Tip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { SPEEDS, type Mode } from "./useInvestigation";
 
-export interface ControlBarProps {
+interface ControlBarProps {
   active: boolean;
   started: boolean;
   busy: boolean;

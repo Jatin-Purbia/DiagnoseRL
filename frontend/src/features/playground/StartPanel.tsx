@@ -9,7 +9,7 @@ import { Field, Input, Select } from "@/components/ui/input";
 import type { Policies, ScenarioSummary } from "@/lib/api";
 import { randomSeed, type StartConfig } from "./useInvestigation";
 
-export const POLICY_HELP: Record<string, string> = {
+const POLICY_HELP: Record<string, string> = {
   cost_aware_bayes: "Weighs the expected value of another test against declaring now, two steps ahead.",
   info_gain: "Runs the test expected to reduce uncertainty the most per unit cost.",
   fixed_order: "Follows a fixed runbook order, then declares the most likely fault.",

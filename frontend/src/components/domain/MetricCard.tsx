@@ -4,7 +4,7 @@ import { Tip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 
-export interface Trend {
+interface Trend {
   /** Signed change expressed in the metric's own unit. */
   delta: number;
   label: string;

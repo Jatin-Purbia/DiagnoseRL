@@ -5,7 +5,7 @@ import { CartesianGrid, Line, LineChart, ReferenceLine, Tooltip, XAxis, YAxis } 
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { AXIS, SERIES, TOOLTIP_STYLE } from "@/components/charts/theme";
 
-export interface BeliefStep {
+interface BeliefStep {
   step: number;
   label: string;
   posterior: number[];

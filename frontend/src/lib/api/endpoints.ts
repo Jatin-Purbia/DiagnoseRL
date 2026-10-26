@@ -32,7 +32,7 @@ export interface SessionFilters {
   q?: string;
 }
 
-export interface TrainingRequest {
+interface TrainingRequest {
   name: string;
   config: Record<string, unknown>;
 }

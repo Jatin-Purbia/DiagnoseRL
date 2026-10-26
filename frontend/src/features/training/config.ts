@@ -4,9 +4,9 @@
 import { z } from "zod";
 
 export const MAX_TIMESTEPS = 5_000_000;
-export const MAX_ENVS = 16;
+const MAX_ENVS = 16;
 /** Server requires the training seed to differ from the fixed validation / test seeds. */
-export const RESERVED_SEEDS = [10_001, 20_002];
+const RESERVED_SEEDS = [10_001, 20_002];
 
 export interface TrainingFormValues {
   name: string;
@@ -80,9 +80,7 @@ const schema = z.object({
   lambda_time: num(0, 100),
 });
 
-export type ValidTraining = z.infer<typeof schema>;
-
-export interface ValidationResult {
+interface ValidationResult {
   errors: Partial<Record<keyof TrainingFormValues, string>>;
   request?: { name: string; config: Record<string, unknown> };
 }

@@ -1,6 +1,6 @@
 import type { ScenarioDetail } from "@/lib/api";
 
-export interface TestSignal {
+interface TestSignal {
   testId: string;
   testName: string;
   /** Total-variation distance between this fault's outcome distribution and the prior-weighted mixture of all other faults (0 = identical, 1 = fully distinguishable). */
@@ -29,7 +29,7 @@ export function faultSignals(scenario: ScenarioDetail, faultIndex: number): Test
 
 export type Difficulty = "easy" | "moderate" | "hard";
 
-export interface FaultDifficulty {
+interface FaultDifficulty {
   faultId: string;
   /** Best single-test separation from the other faults. */
   bestSeparation: number;

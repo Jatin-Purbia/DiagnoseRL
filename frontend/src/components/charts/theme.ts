@@ -24,7 +24,7 @@ export const POLICY_COLORS: Record<string, string> = {
   exact: C.violet,
 };
 
-export const POLICY_LABELS: Record<string, string> = {
+const POLICY_LABELS: Record<string, string> = {
   ppo: "MaskablePPO",
   cost_aware_bayes: "Cost-aware Bayes",
   info_gain: "Information gain",
@@ -34,7 +34,7 @@ export const POLICY_LABELS: Record<string, string> = {
 };
 
 /** Compact labels for crowded axes. */
-export const POLICY_SHORT: Record<string, string> = {
+const POLICY_SHORT: Record<string, string> = {
   ppo: "PPO",
   cost_aware_bayes: "Cost-aware",
   info_gain: "Info gain",

@@ -5,7 +5,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "rec
 import { ChartFrame } from "./ChartFrame";
 import { AXIS, TOOLTIP_STYLE } from "./theme";
 
-export interface HistogramSeries {
+interface HistogramSeries {
   key: string;
   label: string;
   color: string;

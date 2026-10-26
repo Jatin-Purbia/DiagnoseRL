@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { Brand, NavList } from "./AppSidebar";
 import { titleFor } from "./nav";
 
-export function ConnectionStatus() {
+function ConnectionStatus() {
   const health = useHealth();
   const state = health.isPending
     ? { label: "Checking…", dot: "bg-muted", tip: "Checking the backend connection." }
@@ -54,7 +54,7 @@ export function ConnectionStatus() {
   );
 }
 
-export function ThemeToggle() {
+function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

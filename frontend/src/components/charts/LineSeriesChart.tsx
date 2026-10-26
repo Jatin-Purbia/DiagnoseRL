@@ -4,7 +4,7 @@ import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from "r
 import { ChartFrame } from "./ChartFrame";
 import { AXIS, SERIES, TOOLTIP_STYLE } from "./theme";
 
-export interface SeriesDef {
+interface SeriesDef {
   key: string;
   label: string;
   color?: string;
