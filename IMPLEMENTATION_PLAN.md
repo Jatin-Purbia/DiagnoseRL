@@ -2,7 +2,7 @@
 
 Status legend: `[x]` done and verified · `[~]` done with caveats · `[ ]` not done
 
-Last updated: 2026-10-22.
+Last updated: 2026-10-27.
 
 ## Gap analysis (at project start)
 
@@ -29,16 +29,17 @@ Main risks identified up front, and how they were handled:
 | 3 Baselines (5 strategies) | `[x]` | exact solver == independent brute force and == simulated return; exact ≥ all others |
 | 4 Reinforcement learning | `[x]` | train → save → reload → masked inference; same seed ⇒ bit-identical weights |
 | 5 Research evaluation | `[x]` | held-out test set, validation-tuned baselines, paired bootstrap, robustness, ablation, RQ1–RQ5 in `docs/results.md` |
-| 6 Backend + persistence | `[~]` | 70+ API/worker/registry/concurrency tests on SQLite; migration upgrade/check/downgrade; **not run against PostgreSQL** |
-| 7 Frontend | `[~]` | 25 component/workflow tests, lint, typecheck, production build; **not viewed in a browser, no screenshots** |
+| 6 Backend + persistence | `[~]` | API/worker/registry/concurrency/analytics tests on SQLite; migration upgrade/check/downgrade; **not run against PostgreSQL** |
+| 7 Frontend | `[x]` | redesigned dashboard (9 sections, light/dark, typed and schema-validated API client); 148 component/workflow tests, lint, typecheck, production build; inspected in a real browser at desktop and mobile widths with no console errors or horizontal overflow |
 | 8 Hardening + deployment | `[~]` | Dockerfiles, compose file (validated), CI workflow, security controls tested; **Docker images never built and CI never executed** (Docker daemon was not running; no GitHub run) |
 
-## Verification log (2026-10-22)
+## Verification log (2026-10-27)
 
-* `ruff check .` and `ruff format --check`: clean. `mypy --strict src`: clean (58 files).
-* `pytest`: all Python tests passing (config, Bayes, env, baselines, metrics, stats, training,
-  experiment pipeline, API, models, worker, concurrency, stopping).
-* Frontend: `eslint`, `tsc --noEmit`, `vitest` (25 tests), `next build` all pass.
+* `ruff check .` and `ruff format --check`: clean. `mypy --strict src`: clean (51 files).
+* `pytest`: 164 tests passing (config, Bayes, env, baselines, metrics, stats, training,
+  experiment pipeline, API, analytics, models, worker, concurrency, stopping).
+* Frontend: `eslint`, `tsc --noEmit`, `vitest` (148 tests), `next build` all pass. A scripted browser run
+  (`npm run screenshots`) walks every page and a full agent investigation in dark and light themes.
 * Real-server smoke test: uvicorn + the trained 2M-step PPO model, register → activate → session →
   recommendations → declare → report, all over HTTP (hidden fault never exposed).
 * Real experiments run: 3 × 2M-step PPO seeds (standard), 3 × 500k-step PPO seeds (small), 3 × 2M-step
@@ -56,6 +57,20 @@ Main risks identified up front, and how they were handled:
   observation made no detectable difference; a nominal PPO does not adapt to a changed wrong-diagnosis
   penalty.
 
+## Frontend redesign and scope reduction (2026-10)
+
+* The dashboard was rebuilt around a shared shell (collapsible sidebar, top bar, theme toggle) with
+  Overview, Diagnostic Playground, Live Investigations, RL Training, Algorithm Comparison, Fault
+  Explorer, Experiment History, Model Registry and Settings. Every number shown comes from the API;
+  pages show loading, empty and error states instead of placeholder data.
+* Backend additions for it: `GET /analytics`, session filters and `executed_at`, fault categories and
+  descriptions, `training_curve` / `elapsed_seconds` on experiments, training telemetry artifacts, and
+  evaluation `metadata` / `distributions`.
+* Removed as unused: the `diagnoserl.historical` package (real-incident import, estimation, replay),
+  the session `/posterior` and `/history`, model `/metrics` and `/scenarios/validate` endpoints, the
+  experiment `/logs` endpoint and logs dialog, run comparison, and the Pareto overlay. Git history
+  has the earlier versions.
+
 ## Not done / known gaps
 
 * Docker images and `docker compose up` were not run (daemon unavailable in this session). Compose
@@ -64,8 +79,6 @@ Main risks identified up front, and how they were handled:
   SQLite, where it is a no-op. Concurrency safety rests on unique constraints and the version column,
   which are tested on SQLite.
 * The GitHub Actions workflow has never run.
-* No screenshots; the UI was not inspected in a real browser.
 * No end-user authentication (admin API key only), no TLS: must sit behind a proxy.
-* Nothing has been validated on real incident data (none available).
+* Nothing has been validated on real incident data (none available), and the tooling to import it was removed.
 * RL tuning was light; 3 seeds; one scenario.
-* No git commit has been made.

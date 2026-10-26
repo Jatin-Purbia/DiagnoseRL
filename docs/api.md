@@ -33,8 +33,8 @@ Errors always have the same shape:
 | method | path | |
 |---|---|---|
 | POST | `/sessions` | `{scenario, policy, seed?}` → new session (public view) |
-| GET | `/sessions?limit&offset&status` | paginated list |
-| GET | `/sessions/{id}` | session state, posterior, executed tests, available tests |
+| GET | `/sessions?limit&offset&status&scenario&policy&q` | paginated list; `q` is a session id prefix |
+| GET | `/sessions/{id}` | session state, posterior, executed tests (each with `executed_at`, UTC), available tests |
 | GET | `/sessions/{id}/tests` | test catalogue with `executed` / `available` flags |
 | POST | `/sessions/{id}/tests` | `{test_id, expected_step?}` run a simulated test |
 | GET | `/sessions/{id}/recommendation` | policy's next action + explanation |
@@ -42,6 +42,7 @@ Errors always have the same shape:
 | GET | `/sessions/{id}/report` | final report (409 while the session is active) |
 | GET | `/policies` | available policies; scenarios with an active RL model |
 | GET | `/overview` | dashboard aggregates |
+| GET | `/analytics?scenario&policy&since&until` | statistics over finished sessions (accuracy, mean tests / duration / cost / reward, per-day and per-policy breakdown, per-fault accuracy, recent sessions) plus the `options` available for the filters; `since` / `until` are UTC dates, inclusive |
 
 Policies: `cost_aware_bayes`, `info_gain`, `fixed_order`, `random`, `ppo` (needs an active model for
 the scenario).
@@ -62,7 +63,7 @@ explanation.
 | method | path | |
 |---|---|---|
 | GET | `/scenarios` | summaries |
-| GET | `/scenarios/{name}` | faults, priors, tests, outcome distributions `P(result \| fault, test)` |
+| GET | `/scenarios/{name}` | faults (id, name, description, category, prior), tests, outcome distributions `P(result \| fault, test)` |
 
 ## Models (registry)
 
@@ -78,12 +79,12 @@ explanation.
 | method | path | |
 |---|---|---|
 | POST | `/experiments/training` | admin, rate-limited: `{name, config}` queue a training run (202) |
-| GET | `/experiments`, `/experiments/{id}` | list / status, progress, validation curve, artifacts |
+| GET | `/experiments`, `/experiments/{id}` | list / detail: status, progress, `validation_curve`, `training_curve` (from the training callback), `elapsed_seconds`, artifacts |
 | POST | `/experiments/{id}/cancel` | admin: only queued experiments |
-| GET | `/experiments/{id}/artifacts[/{name}]` | `config.json`, `metrics.jsonl`, `summary.json` |
+| GET | `/experiments/{id}/artifacts[/{name}]` | `config.json`, `metrics.jsonl`, `summary.json`, `train_metrics.jsonl`, `train.log` |
 | POST | `/evaluations` | admin, rate-limited: queue an evaluation of trained runs (202) |
 | GET | `/evaluations`, `/evaluations/{id}` | list / status |
-| GET | `/evaluations/{id}/results` | full results (409 until succeeded) |
+| GET | `/evaluations/{id}/results` | full results (409 until succeeded), including `metadata` (scenario, seeds, checkpoint, reward settings) and per-episode `distributions` (duration, tests) |
 | GET | `/evaluations/{id}/figures/{name}.png` | generated figures |
 
 Training configs are validated against `TrainConfig`. The server forces its own `output_dir`, accepts
