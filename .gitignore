@@ -52,3 +52,5 @@ datasets/
 .DS_Store
 Thumbs.db
 
+#report
+DiagnoseRL_Report.pdf

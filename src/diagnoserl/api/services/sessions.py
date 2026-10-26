@@ -217,9 +217,13 @@ class SessionService:
                     f"{needle}%"
                 )
             )
+<<<<<<< HEAD
         stmt = select(orm.DiagnosticSession).options(
             selectinload(orm.DiagnosticSession.declaration)
         )
+=======
+        stmt = select(orm.DiagnosticSession).options(selectinload(orm.DiagnosticSession.declaration))
+>>>>>>> 46abdb8 (Fix N+1 queries in session listing)
         stmt = stmt.where(*filters)
         count = select(func.count()).select_from(orm.DiagnosticSession).where(*filters)
         rows = db.execute(
